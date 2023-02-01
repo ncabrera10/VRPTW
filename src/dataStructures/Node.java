@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import columnGeneration.Master;
 import columnGeneration.VRPTW;
-import globalParameters.CGParameters;
+import parameters.CGParameters;
 import pulseAlgorithm.PulseHandler;
 
 
@@ -12,7 +12,7 @@ import pulseAlgorithm.PulseHandler;
 
 */
 
-public class Node {
+public class Node implements Cloneable{
 
 	/**
 	 * Node number
@@ -55,6 +55,18 @@ public class Node {
 	
 	private ArrayList<Integer> subsetRow_ids;
 	
+	// Additional variables for the tabu search:
+	
+	public double arrivalTime;//Arrival time to the node in the solution
+	public double exitTime; //max(arrivalTime, tw_a)+ service
+	public int route;//Route in which the node is visited
+	public int visited;//Position in the route
+
+	public double cumulativeDist;
+	public double cumulativeCost;
+	public int tw_w;//time window width
+	
+	
 	/** Class constructor
 	 * @param i Node number
 	 * @param d Node demand
@@ -68,6 +80,11 @@ public class Node {
 		service = s;
 		tw_a = a;
 		tw_b = b;	
+		tw_w = b-a;
+		arrivalTime = -1;
+		exitTime = -1;
+		route = -1;
+		visited = -1;
 		magicIndex = new ArrayList<>();
 		subsetRow_ids = new ArrayList<Integer>();
 	}
@@ -376,16 +393,6 @@ return Bound;
 		return id+"";
 	}
 	
-	/**
-	 * Clone  the object
-	 */
-	public Object clone() {
-		try {
-			return super.clone();
-		} catch (CloneNotSupportedException e) {
-			return null;
-		}
-	}
 	
 	/**
 	 * Sort the arcs
@@ -494,5 +501,11 @@ return Bound;
 			}
 		}
 		
-	
+		public Object clone() {
+			try {
+				return super.clone();
+			} catch (CloneNotSupportedException e) {
+				return null;
+			}
+		}
 }

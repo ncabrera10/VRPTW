@@ -10,18 +10,18 @@ import org.jorlib.frameworks.columnGeneration.master.cutGeneration.AbstractInequ
 
 import dataStructures.DataHandler;
 import dataStructures.GraphManager;
-import globalParameters.CGParameters;
 import ilog.concert.IloException;
 import ilog.concert.IloLinearNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.concert.IloRange;
+import parameters.CGParameters;
 
 /**
  * This class is used to generate new subset row inequalities
  * @author nicolas.cabrera-malik
  *
  */
-public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,PLRPMasterData> {
+public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,VRPTWMasterData> {
 
 
 	/**

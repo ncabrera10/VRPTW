@@ -2,8 +2,8 @@ package dataStructures;
 
 import java.util.ArrayList;
 
-import globalParameters.CGParameters;
-import globalParameters.GlobalParameters;
+import parameters.CGParameters;
+import parameters.GlobalParameters;
 import pulseAlgorithm.PulseHandler;
 
 
@@ -67,7 +67,19 @@ public class FinalNode extends Node {
 	/**
 	 * Best solution distance
 	 */
-	double PathDist;		
+	double PathDist;	
+	
+	// Additional variables for the tabu search:
+	
+	public double arrivalTime;//Arrival time to the node in the solution
+	public double exitTime; //max(arrivalTime, tw_a)+ service
+	public int route;//Route in which the node is visited
+	public int visited;//Position in the route
+
+	public double cumulativeDist;
+	public double cumulativeCost;
+	public int tw_w;//time window width
+		
 	
 	/** Class constructor
 	 * @param i Node id
@@ -83,6 +95,11 @@ public class FinalNode extends Node {
 		service = s;
 		tw_a = a;
 		tw_b = b;	
+		tw_w = b-a;
+		arrivalTime = -1;
+		exitTime = -1;
+		route = -1;
+		visited = -1;
 		magicIndex = new ArrayList<Integer>();
 		Path= new ArrayList<Integer>();
 	}

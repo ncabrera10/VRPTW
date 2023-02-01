@@ -8,8 +8,8 @@ import java.util.Hashtable;
 
 import dataStructures.DataHandler;
 import dataStructures.GraphManager;
-import globalParameters.CGParameters;
 import ilog.concert.IloException;
+import parameters.CGParameters;
 
 
 /**
@@ -67,7 +67,7 @@ public class PulseHandler {
 	 */
 	private static ArrayList<ArrayList<Integer>> pathsFound_customers;
 	private static ArrayList<Double> pathsFound_costs;
-	private static ArrayList<String> pathsFound_routes;
+	private static ArrayList<ArrayList<Integer>> pathsFound_routes;
 	private static ArrayList<Double> pathsFound_reducedCosts;
 	
 	//For the subset row inequalities:
@@ -99,7 +99,7 @@ public class PulseHandler {
 		pathsFound_customers = new ArrayList<ArrayList<Integer>>();
 		pathsFound_costs = new ArrayList<Double>();
 		pathsFound_reducedCosts = new ArrayList<Double>();
-		pathsFound_routes = new ArrayList<String>();
+		pathsFound_routes = new ArrayList<ArrayList<Integer>>();
 		
 		// For the cuts:
 		
@@ -156,24 +156,7 @@ public class PulseHandler {
 			DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] = DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] - duals[DataHandler.arcs[i][0]];
 			DataHandler.costList[i] = DataHandler.distList[i]-duals[DataHandler.arcs[i][0]]; //Calculate reduced cost with the dual variable of the tail node of each arc
 			
-		}
-		
-		if(CGParameters.PRINT_IN_CONSOLE) {
-			//for(int i = 0;i<DataHandler.n;i++) {
-			//	System.out.println("Dual customer "+(i+1)+" is equal to: "+duals[i+1]);
-			//}
-			
-			//for(int i = 0;i < DataHandler.numArcs;i++) {
-				
-			//	if(DataHandler.arcs[i][0] == 1) {
-					//System.out.println("Arc "+i+" - between "+DataHandler.arcs[i][0]+" - "+DataHandler.arcs[i][1]+" cost of "+DataHandler.distance[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]]+" and red cost of"+DataHandler.costList[i]);
-					
-			//	}
-				
-			//}
-		}
-		
-		
+		}	
 		
 	}
 	
@@ -305,11 +288,11 @@ public class PulseHandler {
 		PulseHandler.pathsFound_costs = pathsFound_costs;
 	}
 
-	public static ArrayList<String> getPathsFound_routes() {
+	public static ArrayList<ArrayList<Integer>> getPathsFound_routes() {
 		return pathsFound_routes;
 	}
 
-	public void setPathsFound_routes(ArrayList<String> pathsFound_routes) {
+	public void setPathsFound_routes(ArrayList<ArrayList<Integer>> pathsFound_routes) {
 		PulseHandler.pathsFound_routes = pathsFound_routes;
 	}
 	
@@ -337,21 +320,24 @@ public class PulseHandler {
 	 */
 	public synchronized static void addPath(ArrayList<Integer> p,Double reducedCost,Double distance) {
 		ArrayList<Integer> new_list = new ArrayList<Integer>();
-		String r = "";
-		for(int i = 0;i < p.size()-1;i++) {
-			r += "("+p.get(i)+"-"+p.get(i+1)+");";
-		}
-		r += "("+p.get(p.size()-1)+"-"+p.get(0)+")";
-		if(!pathsFound_routes.contains(r)) {
+		ArrayList<Integer> r = new ArrayList<Integer>();
+		//String r = "";
+		//for(int i = 0;i < p.size()-1;i++) {
+		//	r += "("+p.get(i)+"-"+p.get(i+1)+");";
+		//}
+		//r += "("+p.get(p.size()-1)+"-"+p.get(0)+")";
+		//if(!pathsFound_routes.contains(r)) {
 			for(int i=0;i<p.size();i++) {
 				new_list.add(p.get(i));
+				r.add(p.get(i));
 			}
+			r.add(p.get(0));
 			pathsFound_customers.add(new_list);
 			pathsFound_costs.add(distance);
 			pathsFound_routes.add(r);
 			pathsFound_reducedCosts.add(reducedCost);
 			setNumPaths(getNumPaths() + 1);
-		}
+		//}
 		
 	}
 

@@ -1,5 +1,6 @@
 package columnGeneration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.jorlib.frameworks.columnGeneration.colgenMain.AbstractColumn;
@@ -7,8 +8,8 @@ import org.jorlib.frameworks.columnGeneration.colgenMain.AbstractColumn;
 import pulseAlgorithm.PA_PricingProblem;
 
 /**
- * Implementation of a column in the PLRP.
- * A column is a route visiting some clients with a park-and-loop structure.
+ * Implementation of a column in the VRPTW.
+ * A column is a route visiting some customers respecting the time windows and the vehicle capacity.
  * 
  */
 
@@ -34,9 +35,9 @@ public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
 	public double reducedCost;
 	
 	/**
-	 * String associated to this route
+	 * ArrayList<Integer> associated to this route
 	 */
-	public String route;
+	public ArrayList<Integer> route;
 	
 	/**
 	 * Binary indicator: true if the column is artificial
@@ -64,7 +65,7 @@ public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
 	 * @param pricingProblem
 	 * @param redco
 	 */
-	public RoutePattern(String creator, boolean isArtificial, int[] pattern, double totalCost,String r,PA_PricingProblem pricingProblem,double redco) {
+	public RoutePattern(String creator, boolean isArtificial, int[] pattern, double totalCost,ArrayList<Integer> r,PA_PricingProblem pricingProblem,double redco) {
 		super(pricingProblem, isArtificial, creator);
 		this.yieldVector=pattern;
 		this.cost = totalCost;
@@ -93,7 +94,7 @@ public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
 		if(!(o instanceof RoutePattern))
 			return false;
 		RoutePattern other=(RoutePattern) o;
-		return (Arrays.equals(this.yieldVector, other.yieldVector) && other.cost == this.cost && other.route.equals(this.route));
+		return (other.cost == this.cost && Arrays.equals(this.yieldVector, other.yieldVector) && other.route.toString().equals(this.route.toString()));
 	}
 
 	@Override
@@ -103,7 +104,7 @@ public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
 
 	@Override
 	public String toString() {
-		return id+" - "+"with value: "+ this.value+" Route pattern: "+Arrays.toString(yieldVector)+" actual route: "+route+" cost: "+this.cost+" reduced cost (When created): "+this.reducedCost+" creator: "+ this.creator;
+		return id+" - "+"with value: "+ this.value+" Route pattern: "+Arrays.toString(yieldVector)+" actual route: "+route.toString()+" cost: "+this.cost+" reduced cost (When created): "+this.reducedCost+" creator: "+ this.creator;
 	}
 
 	

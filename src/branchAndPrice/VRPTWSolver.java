@@ -21,23 +21,22 @@ import org.jorlib.frameworks.columnGeneration.pricing.AbstractPricingProblemSolv
 import columnGeneration.Master;
 import columnGeneration.VRPTW;
 import dataStructures.DataHandler;
-import columnGeneration.PLRPMasterData;
+import columnGeneration.VRPTWMasterData;
 import columnGeneration.RoutePattern;
 import columnGeneration.SubsetRowInequalityGenerator;
-//import dataStructures.DataHandler;
-import globalParameters.CGParameters;
-import globalParameters.GlobalParameters;
 import ilog.concert.IloColumn;
 import ilog.concert.IloException;
 import ilog.concert.IloNumVar;
 import ilog.concert.IloObjective;
 import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
+import parameters.CGParameters;
+import parameters.GlobalParameters;
 import pulseAlgorithm.PA_PricingProblem;
 import pulseAlgorithm.PA_Solver;
 
 /**
- * Simple solver class which solves the PLRP Problem through Column Generation.
+ * Simple solver class which solves the VRPTW Problem through Branch-price-and-cut.
  * 
  */
 public final class VRPTWSolver {
@@ -89,7 +88,7 @@ public final class VRPTWSolver {
 		
 		//Create a cutHandler, then create a Subtour AbstractInequality Generator and add it to the handler
 		
-		CutHandler<VRPTW,PLRPMasterData> cutHandler = new CutHandler<>();
+		CutHandler<VRPTW,VRPTWMasterData> cutHandler = new CutHandler<>();
 		SubsetRowInequalityGenerator cutGen = new SubsetRowInequalityGenerator(dataModel);
 		cutHandler.addCutGenerator(cutGen);
 							
@@ -336,7 +335,7 @@ public final class VRPTWSolver {
 
 		//1.3 Solve the model and print the solution:
 			
-			String ruta = globalParameters.GlobalParameters.RESULT_FOLDER+"BPC/Solution-"+DataHandler.instanceType+"-"+DataHandler.instanceNumber+"_"+DataHandler.n+"_"+CGParameters.CONFIGURATION+".txt";
+			String ruta = parameters.GlobalParameters.RESULT_FOLDER+"BPC/Solution-"+DataHandler.instanceType+"-"+DataHandler.instanceNumber+"_"+DataHandler.n+"_"+CGParameters.CONFIGURATION+".txt";
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(new File(ruta));
@@ -356,15 +355,10 @@ public final class VRPTWSolver {
 								column.value = 0.0;
 							}
 							
-							String currentRoute = column.route;
-							String[] parts = currentRoute.split(";");
-
-							for(int j=0;j<parts.length;j++) {
-								
-								String currentArc = parts[j];
-								currentArc = currentArc.replaceAll("[()]", "");
-								String[] currentNodes = currentArc.split("-");
-								pw.println((Integer.parseInt(currentNodes[0])+1)+";"+(Integer.parseInt(currentNodes[1])+1)+";1;"+i);
+							ArrayList<Integer> currentRoute = column.route;
+							
+							for(int j=0;j<currentRoute.size()-1;j++) {
+								pw.println((currentRoute.get(j)+1)+";"+(currentRoute.get(j+1)+1)+";1;"+i);
 								
 							}
 						}

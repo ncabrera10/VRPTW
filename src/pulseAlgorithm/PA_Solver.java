@@ -1,6 +1,7 @@
 package pulseAlgorithm;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import org.jorlib.frameworks.columnGeneration.branchAndPrice.branchingDecisions.BranchingDecision;
 import org.jorlib.frameworks.columnGeneration.io.TimeLimitExceededException;
@@ -11,6 +12,8 @@ import branchAndPrice.RemoveArc;
 import columnGeneration.Master;
 import columnGeneration.VRPTW;
 import dataStructures.DataHandler;
+import metaheuristics.TabuSearch;
+import parameters.CGParameters;
 import columnGeneration.RoutePattern;
 
 /**
@@ -66,6 +69,95 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 		// Initializes the list of patterns:
 		
 		List<RoutePattern> newPatterns=new ArrayList<>();
+		
+		
+		// Tries to find columns using the tabu search: So far it can only be used if no cuts have been added
+		
+		try {
+			
+			if(VRPTW.numInequalities < 1 && VRPTW.cgIteration <= CGParameters.NUM_ITERATIONS_TS) {
+			
+				// Updates the weights of the arcs :
+				
+				for(int i = 0;i < DataHandler.numArcs;i++) {
+					
+					DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] = DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] - Master.getDuals()[DataHandler.arcs[i][0]];
+					DataHandler.costList[i] = DataHandler.distList[i]-Master.getDuals()[DataHandler.arcs[i][0]]; //Calculate reduced cost with the dual variable of the tail node of each arc
+					
+				}	
+				
+				Master.heuristics.resetPool();
+				
+				// Calls the tabu search: 
+				
+				TabuSearch ts = new TabuSearch(Master.heuristics);
+				ts.run(Master.basisIndexes, 0);
+				
+				ArrayList<String> newCols = Master.heuristics.getPoolCols();
+				Hashtable<String, Double> colsRC = Master.heuristics.getHeuPoolRC();
+				Hashtable<String, Double> colsDist = Master.heuristics.getHeuPoolDist();
+				//Hashtable<String, Integer> generators = Master.heuristics.getColsGenerator();
+				if(newCols.size()==0){
+					System.out.println("Entre aqui, no genera nada");
+				}
+				for (int i = 0; i < Math.min(5000, newCols.size()); i++) {
+					String key = newCols.get(i);
+					if(i==0){
+					}
+					String col = newCols.get(i);
+					
+					col = col.substring(1,col.length()-1);
+					String[] colSplit = col.split(", ");
+					ArrayList<Integer> dummyPath = new ArrayList<>();
+					for (int j = 0; j < colSplit.length; j++) {
+						int node = Integer.parseInt(colSplit[j]);
+						dummyPath.add(node);
+						
+					}
+					
+					if(colsRC.get(key) < 0) {
+						
+						int[] pattern=new int[DataHandler.n];
+						for(int j=0;j<DataHandler.n;j++) {
+							pattern[j] = 0;
+						}
+						
+						for(int j=1;j<dummyPath.size()-1;j++) {
+							pattern[dummyPath.get(j)-1] = 1;
+						}
+						
+						//Creates the pattern
+						
+						RoutePattern column = new RoutePattern("TabuSearch", false, pattern,colsDist.get(key),dummyPath,pricingProblem,colsRC.get(key));
+						newPatterns.add(column);
+						//System.out.println(dummyPath.toString()+" - "+colsDist.get(key)+" - "+generators.get(key)+" - "+colsRC.get(key));
+						
+					}
+					//pool.add(dummyPath);
+					//pDist.add(colsDist.get(key));
+					//generator.add(generators.get(key));
+				}
+				
+				// Re-updates the weights of the arcs :
+				
+				for(int i = 0;i < DataHandler.numArcs;i++) {
+					
+					DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] = DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] + Master.getDuals()[DataHandler.arcs[i][0]];
+					DataHandler.costList[i] = DataHandler.distList[i]+Master.getDuals()[DataHandler.arcs[i][0]]; //Calculate reduced cost with the dual variable of the tail node of each arc
+					
+				}	
+				if(newPatterns.size() > 0) {
+					return(newPatterns);
+				}
+			}
+			
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("Problem running the tabu search");
+			System.exit(0);
+		}
+		
 		
 		// Tries to run the pulse algorithm: 
 		

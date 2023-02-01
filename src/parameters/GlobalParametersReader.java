@@ -1,4 +1,4 @@
-package globalParameters;
+package parameters;
 
 
 import java.io.FileInputStream;

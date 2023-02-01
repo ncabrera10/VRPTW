@@ -1,5 +1,6 @@
 package branchAndPrice;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -10,9 +11,9 @@ import org.jorlib.frameworks.columnGeneration.branchAndPrice.AbstractBranchCreat
 import org.jorlib.frameworks.columnGeneration.branchAndPrice.BAPNode;
 
 import columnGeneration.VRPTW;
+import parameters.CGParameters;
+import parameters.GlobalParameters;
 import columnGeneration.RoutePattern;
-import globalParameters.CGParameters;
-import globalParameters.GlobalParameters;
 import pulseAlgorithm.PA_PricingProblem;
 
 /**
@@ -74,16 +75,12 @@ public final class BranchOnArc extends  AbstractBranchCreator<VRPTW,RoutePattern
 					
 					// Recover the route associated to the path:
 					
-					String base = currentPath.route;
-					
-					// Recover the arcs in the route:
-					
-					String[] arcs = base.split(";");
+					ArrayList<Integer> base = currentPath.route;
 					
 					// Iterate over all arcs:
 					
-					for(int j = 0;j<arcs.length;j++) {
-						String arc_act = arcs[j].replaceAll("[()]","");
+					for(int j = 0;j<base.size()-1;j++) {
+						String arc_act = base.get(j)+"-"+base.get(j+1);
 						if(!arc_values.containsKey(arc_act)) {
 							arc_values.put(arc_act,currentPath.value);
 						}else {

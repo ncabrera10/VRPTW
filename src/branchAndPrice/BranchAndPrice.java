@@ -19,9 +19,9 @@ import org.jorlib.frameworks.columnGeneration.pricing.AbstractPricingProblemSolv
 import columnGeneration.ColumnGenerationDirector;
 import columnGeneration.Master;
 import columnGeneration.VRPTW;
+import parameters.CGParameters;
+import parameters.GlobalParameters;
 import columnGeneration.RoutePattern;
-import globalParameters.CGParameters;
-import globalParameters.GlobalParameters;
 import pulseAlgorithm.PA_PricingProblem;
 
 /**

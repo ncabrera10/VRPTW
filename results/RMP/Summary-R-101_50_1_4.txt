@@ -3,9 +3,9 @@ Configuration:1_4
 UpperBound:1044.0
 LowerBound:1044.0
 GAP:0.0
-Iterations:25
-NumberOfColumns:310
+Iterations:14
+NumberOfColumns:1098
 NumberOfColumns_IniStep:100
-NumberOfColumns_Additional:210
+NumberOfColumns_Additional:998
 NumberOfCuts:6
-ComputationalTime:0.287710621
+ComputationalTime:1.857146885

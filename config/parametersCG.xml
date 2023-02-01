@@ -17,5 +17,9 @@
 <entry key="MAX_SUBSET_ROW_INEQ_PERCUSTOMER">5</entry> 
 <entry key="MAX_SUBSET_ROW_INEQ_ROOTNODE">1000</entry> 
 
+<entry key="MAX_ITERATIONS_TS">10</entry> 
+<entry key="NUM_ITERATIONS_TS">0</entry> 
+
+
 
 </properties>

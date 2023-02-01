@@ -110,17 +110,20 @@ public final class RemoveArc implements BranchingDecision<VRPTW,RoutePattern>{
 		
 		//We check if the column contains the key arc:
 		
-		if(column.route.contains(this.keyArc)) {
-			return(false);
+		for(int j=0;j<column.route.size()-1;j++) {
+			if(column.route.get(j) == tail_id && column.route.get(j+1) == head_id) {
+				return(false);
+			}
 		}
 		
 		// Iterate through the lists of forbidden arcs:
 		
-				
 		int numD = tails_drive.size();
 		for(int i=0;i<numD;i++) {
-			if(column.route.contains("("+tails_drive.get(i)+"-"+heads_drive.get(i)+")")){
-				return(false);
+			for(int j=0;j<column.route.size()-1;j++) {
+				if(column.route.get(j) == tails_drive.get(i) && column.route.get(j+1) == heads_drive.get(i)) {
+					return(false);
+				}
 			}
 		}
 

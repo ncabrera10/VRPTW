@@ -14,7 +14,6 @@ import org.jorlib.frameworks.columnGeneration.master.cutGeneration.CutHandler;
 import org.jorlib.frameworks.columnGeneration.util.OrderedBiMap;
 
 import dataStructures.DataHandler;
-import globalParameters.GlobalParameters;
 //import globalParameters.GlobalParameters;
 import ilog.concert.IloColumn;
 import ilog.concert.IloException;
@@ -22,6 +21,8 @@ import ilog.concert.IloNumVar;
 import ilog.concert.IloObjective;
 import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
+import metaheuristics.MetaheuristicHandler;
+import parameters.GlobalParameters;
 import pulseAlgorithm.PA_PricingProblem;
 
 /**
@@ -30,14 +31,29 @@ import pulseAlgorithm.PA_PricingProblem;
  * @author nicolas.cabrera-malik
  *
  */
-public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_PricingProblem, PLRPMasterData> {
+public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_PricingProblem, VRPTWMasterData> {
 
 	//Cplex objects:
 	
 	IloCplex cplex; //Cplex instance
 	private IloObjective obj; //Objective function
 	private IloRange[] satisfyDemandConstr; //Constraint
-
+	
+	//Criteria to accept a column:
+	
+	public static double rcCriteriaHeuristics = -0.1;
+	public static double rcCriteriaExact = -0.1;
+	
+	//ArrayList to keep track of the method that created a certain column
+	
+	public static ArrayList<Integer> generator;
+	
+	//For the tabu search:
+	
+	public static boolean firstTimeHEu = true;
+	public static MetaheuristicHandler heuristics;
+	
+	
 	/**
 	 * Number of customers
 	 */
@@ -49,11 +65,21 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	private static ArrayList<RoutePattern> paths;
 	
 	/**
+	 * ID's of the paths that are part of the current basis
+	 */
+	public static ArrayList<Integer>basisIndexes;
+	
+	/**
+	 * ID's of the paths that are NOT part of the current basis 
+	 */
+
+	public static ArrayList<Integer>ceroRCIndexes;
+	
+	/**
 	 * Array to store the dual variables: real values
 	 */
 	private static double[] duals;
-
-		
+	
 	/**
 	 * Stores the id of the last path
 	 */
@@ -70,7 +96,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	private static Hashtable<Integer,Double> duals_subset;
 			
 	/** Constructor: receives our data model and a reference to our pricing problem**/
-	public Master(VRPTW modelData, PA_PricingProblem pricingProblem, CutHandler<VRPTW,PLRPMasterData> cutHandler) {
+	public Master(VRPTW modelData, PA_PricingProblem pricingProblem, CutHandler<VRPTW,VRPTWMasterData> cutHandler) {
 		super(modelData, pricingProblem, cutHandler,OptimizationSense.MINIMIZE);
 	}
 
@@ -85,6 +111,10 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 		N = num;
 		pathN = 0;
 		paths = new ArrayList<RoutePattern>();
+		basisIndexes = new ArrayList<Integer>();
+		ceroRCIndexes = new ArrayList<Integer>();
+		generator = new ArrayList<Integer>();
+		heuristics = new MetaheuristicHandler();
 		
 		//Initialize the dual variables values:
 		
@@ -121,17 +151,23 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			}
 			double cost = DataHandler.cost[0][j] + DataHandler.cost[j][0];
 			pattern[j-1] = 1;
-			RoutePattern column=new RoutePattern("Artificial", true, pattern,cost*10,"("+0+"-"+j+");("+j+"-"+0+")",pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
+			ArrayList<Integer>route = new ArrayList<Integer>();
+			route.add(0);
+			route.add(j);
+			route.add(0);
+			RoutePattern column=new RoutePattern("Artificial", true, pattern,cost*10,route,pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
 			paths.add(column);
 			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
 			pathN++;
 			initSolution.add(column);
+			generator.add(-1);
 			
-			column = new RoutePattern("Initialization", false, pattern,cost,"("+0+"-"+j+");("+j+"-"+0+")",pricingProblem,0); //These are not artificial.. in the BAP
+			column = new RoutePattern("Initialization", false, pattern,cost,route,pricingProblem,0); //These are not artificial.. in the BAP
 			paths.add(column);
 			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
 			pathN++;
 			initSolution.add(column);
+			generator.add(-1);
 		}
 		
 		//Store the number of columns created on the initialization step
@@ -166,17 +202,23 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			}
 			double cost = DataHandler.cost[0][j-1] + DataHandler.cost[j-1][0];
 			pattern[j-1] = 1;
-			RoutePattern column=new RoutePattern("Artificial", true, pattern,cost*10,"("+0+"-"+j+");("+j+"-"+0+")",pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
+			ArrayList<Integer>route = new ArrayList<Integer>();
+			route.add(0);
+			route.add(j);
+			route.add(0);
+			RoutePattern column=new RoutePattern("Artificial", true, pattern,cost*10,route,pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
 			paths.add(column);
 			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
 			pathN++;
 			initSolution.add(column);
+			generator.add(-1);
 			
-			column = new RoutePattern("Initialization", false, pattern,cost,"("+0+"-"+j+");("+j+"-"+0+")",pricingProblem,0); //These are not artificial.. in the BAP
+			column = new RoutePattern("Initialization", false, pattern,cost,route,pricingProblem,0); //These are not artificial.. in the BAP
 			paths.add(column);
 			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
 			pathN++;
 			initSolution.add(column);
+			generator.add(-1);
 		}
 		
 		//Store the number of columns created on the initialization step
@@ -193,7 +235,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	protected PLRPMasterData buildModel() {
+	protected VRPTWMasterData buildModel() {
 		try {
 			cplex =new IloCplex(); //Create cplex instance
 			cplex.setOut(null); //Disable cplex output
@@ -219,7 +261,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 
 		//Return a new data object which will hold data from the Master Problem. Since we are not working with inequalities in this example,
 		//we can simply return the default.
-		return new PLRPMasterData(cplex,varMap);
+		return new VRPTWMasterData(cplex,varMap);
 	}
 
 	/**
@@ -248,6 +290,25 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 				}
 			}else{
 				masterData.objectiveValue= cplex.getObjValue();
+				
+				//Capture the basic and non-basic variables:
+				
+				basisIndexes = new ArrayList<Integer>();
+				ceroRCIndexes = new ArrayList<Integer>();
+				RoutePattern[] routePatterns=masterData.getVarMap().getKeysAsArray(new RoutePattern[masterData.getNrColumns()]);
+				IloNumVar[] vars=masterData.getVarMap().getValuesAsArray(new IloNumVar[masterData.getNrColumns()]);
+				double[] values= cplex.getValues(vars);
+				
+				//Iterate over each column and add it to the solution if it has a non-zero value
+				for(int i=0; i<routePatterns.length; i++){
+					routePatterns[i].value=values[i];
+					if(values[i]>=config.PRECISION){
+						basisIndexes.add(i);
+					}else {
+						ceroRCIndexes.add(i);
+					}
+				}
+				
 			}
 		} catch (IloException e) {
 			e.printStackTrace();
@@ -352,6 +413,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			cplex.add(var);
 			masterData.addColumn(column, var);
 			
+			
 		} catch (IloException e) {
 			e.printStackTrace();
 		}
@@ -367,12 +429,15 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			RoutePattern[] routePatterns=masterData.getVarMap().getKeysAsArray(new RoutePattern[masterData.getNrColumns()]);
 			IloNumVar[] vars=masterData.getVarMap().getValuesAsArray(new IloNumVar[masterData.getNrColumns()]);
 			double[] values= cplex.getValues(vars);
-
+			
 			//Iterate over each column and add it to the solution if it has a non-zero value
 			for(int i=0; i<routePatterns.length; i++){
 				routePatterns[i].value=values[i];
 				if(values[i]>=config.PRECISION){
 					solution.add(routePatterns[i]);
+					basisIndexes.add(i);
+				}else {
+					ceroRCIndexes.add(i);
 				}
 			}
 		} catch (IloException e) {
@@ -520,6 +585,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 		masterData.currentSolution = solution;
 		return super.hasNewCuts();
 	}
+
 
 	
 }

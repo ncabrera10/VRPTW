@@ -10,7 +10,7 @@ import org.jorlib.frameworks.columnGeneration.pricing.AbstractPricingProblemSolv
 import pulseAlgorithm.PA_PricingProblem;
 
 /**
- * This method runs the column generation procedure, but with a simple stabilization technique!.
+ * This method runs the column generation procedure.
  * @author nicolas.cabrera-malik
  *
  */
@@ -26,7 +26,7 @@ public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, 
 	 */
 	@Override
 	protected double calculateBoundOnMasterObjective(Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PA_PricingProblem>> solver) {
-		return 0.0; //In the current implementation we do not worry about this calculation.
+		return 0.0; //In the current implementation we do not worry about this calculation. But we could..
 	}
 
 	
@@ -65,9 +65,7 @@ public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, 
 		boolean continuar = true;
 		notifier.fireStartCGEvent();
 		do{
-			//if(nrOfColGenIterations == 2) {
-			//	System.exit(0);
-			//}
+
 			nrOfColGenIterations++;
 			VRPTW.cgIteration++;
 			hasNewCuts=false;

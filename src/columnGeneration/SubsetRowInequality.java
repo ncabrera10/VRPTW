@@ -25,7 +25,7 @@ public class SubsetRowInequality extends AbstractInequality implements Comparabl
 	
 	public final double violation;
 	
-	public SubsetRowInequality(AbstractCutGenerator<VRPTW,PLRPMasterData> maintainingGenerator, ArrayList<Integer> cutSet,ArrayList<RoutePattern> routes,ArrayList<Integer>coefficients,int id,double viol,ArrayList<Integer>routes_id) {
+	public SubsetRowInequality(AbstractCutGenerator<VRPTW,VRPTWMasterData> maintainingGenerator, ArrayList<Integer> cutSet,ArrayList<RoutePattern> routes,ArrayList<Integer>coefficients,int id,double viol,ArrayList<Integer>routes_id) {
 		super(maintainingGenerator);
 		this.cutSet=cutSet;
 		this.routes=routes;

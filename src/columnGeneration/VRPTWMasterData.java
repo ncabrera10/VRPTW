@@ -23,7 +23,7 @@ import pulseAlgorithm.PA_PricingProblem;
  */
 
 
-public final class PLRPMasterData extends MasterData<VRPTW, RoutePattern, PA_PricingProblem, IloNumVar>{
+public final class VRPTWMasterData extends MasterData<VRPTW, RoutePattern, PA_PricingProblem, IloNumVar>{
 
 	/** Mapping of the Subtour inequalities to constraints in the cplex model **/
 	public final Map<SubsetRowInequality, IloRange> subsetRowInequalities;
@@ -32,7 +32,7 @@ public final class PLRPMasterData extends MasterData<VRPTW, RoutePattern, PA_Pri
 	
 	public ArrayList<RoutePattern> currentSolution;
 	
-	public PLRPMasterData(IloCplex cplex,Map<PA_PricingProblem, OrderedBiMap<RoutePattern, IloNumVar>> varMap) {
+	public VRPTWMasterData(IloCplex cplex,Map<PA_PricingProblem, OrderedBiMap<RoutePattern, IloNumVar>> varMap) {
 		super(varMap);
 		subsetRowInequalities=new LinkedHashMap<>();
 		this.cplex=cplex;

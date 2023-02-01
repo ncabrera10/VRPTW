@@ -1,4 +1,4 @@
-package globalParameters;
+package parameters;
 
 /**
  * This class contains the main parameters of the BCP procedure
@@ -92,5 +92,22 @@ public class CGParameters {
 		
 		public static int MAX_SUBSET_ROW_INEQ_ROOTNODE = CGParametersReader.<Integer>get("MAX_SUBSET_ROW_INEQ_ROOTNODE", Integer.class);
 		
+	// Parameters for the tabu search
+		
+		/**
+		 * Maximum number of iteration for each call of the tabu search
+		 */
+		
+		public static int MAX_ITERATIONS_TS = CGParametersReader.<Integer>get("MAX_ITERATIONS_TS", Integer.class);
+		;
+		
+		/**
+		 * Maximum number of iterations in which we can use the tabu search (1) only for the first CG iteration
+		 */
+		
+		public static int NUM_ITERATIONS_TS = CGParametersReader.<Integer>get("NUM_ITERATIONS_TS", Integer.class);
+		;
+		
+	
 		
 }

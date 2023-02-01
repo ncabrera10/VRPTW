@@ -1,4 +1,4 @@
-package globalParameters;
+package parameters;
 
 /**
  * This class contains the global parameters

@@ -1,10 +1,10 @@
 package main;
 
 import director.Solver;
-import globalParameters.CGParameters;
-import globalParameters.CGParametersReader;
-import globalParameters.GlobalParameters;
-import globalParameters.GlobalParametersReader;
+import parameters.CGParameters;
+import parameters.CGParametersReader;
+import parameters.GlobalParameters;
+import parameters.GlobalParametersReader;
 
 /**
  * This class runs the CG/BPC procedure. 

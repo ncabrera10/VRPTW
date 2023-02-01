@@ -9,7 +9,7 @@ import java.util.Hashtable;
 import columnGeneration.VRPTW;
 import columnGeneration.VRPTWSolver;
 import dataStructures.DataHandler;
-import globalParameters.CGParameters;
+import parameters.CGParameters;
 
 /**
  * This class organizes the column generation/bcp procedure.
@@ -163,11 +163,11 @@ public class Solver {
 		System.out.println("GAP = "+100*((CGSolver.getUpperBound() - CGSolver.getLowerBound())/(CGSolver.getUpperBound())));
 		System.out.println("------------------------------------");
 		System.out.println("Don't forget to plot your solution on: https://nicolascabrera.shinyapps.io/VRPTW/");
-		System.out.println("Your file should be located at: "+globalParameters.GlobalParameters.RESULT_FOLDER+"RMP/");
+		System.out.println("Your file should be located at: "+parameters.GlobalParameters.RESULT_FOLDER+"RMP/");
 		System.out.println("Name of the file: Solution-"+instance+"_"+CGParameters.CONFIGURATION+".txt");
 		System.out.println("------------------------------------");
 		
-		String ruta = globalParameters.GlobalParameters.RESULT_FOLDER+"RMP/Summary-"+instance+"_"+CGParameters.CONFIGURATION+".txt";
+		String ruta = parameters.GlobalParameters.RESULT_FOLDER+"RMP/Summary-"+instance+"_"+CGParameters.CONFIGURATION+".txt";
 
 		PrintWriter pw;
 		try {
@@ -212,11 +212,11 @@ public class Solver {
 		System.out.println("GAP = "+100*((CGSolver.getUpperBound() - CGSolver.getLowerBound())/(CGSolver.getUpperBound())));
 		System.out.println("------------------------------------");
 		System.out.println("Don't forget to plot your solution on: https://nicolascabrera.shinyapps.io/VRPTW/");
-		System.out.println("Your file should be located at: "+globalParameters.GlobalParameters.RESULT_FOLDER+"BPC/");
+		System.out.println("Your file should be located at: "+parameters.GlobalParameters.RESULT_FOLDER+"BPC/");
 		System.out.println("Name of the file: Solution-"+instance+"_"+CGParameters.CONFIGURATION+".txt");
 		System.out.println("------------------------------------");
 		
-		String ruta = globalParameters.GlobalParameters.RESULT_FOLDER+"RMP/Summary-"+instance+"_"+CGParameters.CONFIGURATION+".txt";
+		String ruta = parameters.GlobalParameters.RESULT_FOLDER+"BPC/Summary-"+instance+"_"+CGParameters.CONFIGURATION+".txt";
 
 		PrintWriter pw;
 		try {
