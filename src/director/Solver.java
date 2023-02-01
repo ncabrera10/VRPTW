@@ -216,7 +216,7 @@ public class Solver {
 		System.out.println("Name of the file: Solution-"+instance+"_"+CGParameters.CONFIGURATION+".txt");
 		System.out.println("------------------------------------");
 		
-		String ruta = globalParameters.GlobalParameters.RESULT_FOLDER+"RMP/Summary-"+instance+"_"+CGParameters.CONFIGURATION+".txt";
+		String ruta = globalParameters.GlobalParameters.RESULT_FOLDER+"BPC/Summary-"+instance+"_"+CGParameters.CONFIGURATION+".txt";
 
 		PrintWriter pw;
 		try {
