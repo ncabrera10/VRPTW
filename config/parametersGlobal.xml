@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="INSTANCE_FOLDER">./data/</entry>
+<entry key="RESULT_FOLDER">./results/</entry> 
+<entry key="SOLUTIONS_FOLDER">./solutions/</entry> 
+<entry key="AUXILIAR_FOLDER">./auxiliar/</entry> 
+
+<entry key="PRECISION">6</entry> 
+<entry key="SOLVER_NB_THREA4S">1</entry> 
+<entry key="SOLVER_LOG_FOLDER">./gurobi/log/</entry> 
+<entry key="SOLVER_LP_FOLDER">./gurobi/lp/</entry> 
+
+<entry key="SEED">1</entry> 
+<entry key="THREADS">1</entry> 
+</properties>

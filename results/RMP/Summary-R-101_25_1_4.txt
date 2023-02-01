@@ -1,0 +1,11 @@
+Instance:R-101_25
+Configuration:1_4
+UpperBound:617.1
+LowerBound:617.1
+GAP:0.0
+Iterations:17
+NumberOfColumns:113
+NumberOfColumns_IniStep:50
+NumberOfColumns_Additional:63
+NumberOfCuts:0
+ComputationalTime:0.236331388

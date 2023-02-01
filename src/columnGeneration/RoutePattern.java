@@ -1,0 +1,110 @@
+package columnGeneration;
+
+import java.util.Arrays;
+
+import org.jorlib.frameworks.columnGeneration.colgenMain.AbstractColumn;
+
+import pulseAlgorithm.PA_PricingProblem;
+
+/**
+ * Implementation of a column in the PLRP.
+ * A column is a route visiting some clients with a park-and-loop structure.
+ * 
+ */
+
+public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
+
+	/** Abstract Column - This class defines a column in the CG process. **/
+	/** Defines a column. Each column has information regarding if a client is visited or not **/
+	/** This information is stores in yield vector **/
+	
+	/**
+	 * Vector that states if a customer is visited or not in the route
+	 */
+	public final int[] yieldVector;
+	
+	/**
+	 * Total cost associated to this route
+	 */
+	public double cost;
+	
+	/**
+	 * Reduced cost (when the path was created)
+	 */
+	public double reducedCost;
+	
+	/**
+	 * String associated to this route
+	 */
+	public String route;
+	
+	/**
+	 * Binary indicator: true if the column is artificial
+	 */
+	public boolean isArtif;
+	
+	/**
+	 * Id of the route
+	 */
+	
+	public int id;
+	
+	/**
+	 * Binary indicator: true if the column is elementary
+	 */
+	
+	public boolean isElementary;
+	/**
+	 * This method creates a route pattern
+	 * @param creator
+	 * @param isArtificial
+	 * @param pattern
+	 * @param totalCost
+	 * @param r
+	 * @param pricingProblem
+	 * @param redco
+	 */
+	public RoutePattern(String creator, boolean isArtificial, int[] pattern, double totalCost,String r,PA_PricingProblem pricingProblem,double redco) {
+		super(pricingProblem, isArtificial, creator);
+		this.yieldVector=pattern;
+		this.cost = totalCost;
+		this.route = r;
+		this.reducedCost = redco;
+		if(creator.equals("Artificial")) {
+			this.isArtif = true;
+		}else {
+			this.isArtif = false;
+		}
+		this.id = VRPTW.numColumns;
+		VRPTW.numColumns++;
+		
+		/** String creator: textual description denoting who created the column (some algorithm,
+		 * an initial solution, etc.). For debugging purposes.
+		 * boolean isArtificial: artificial columns may be added to create an initial feasible solution to the MP.
+		 * PricingProblem: the pricing problem to which this column belongs. **/
+
+	}
+
+	/** The equals and hashCode methods are important **/
+	@Override
+	public boolean equals(Object o) {
+		if(this==o)
+			return true;
+		if(!(o instanceof RoutePattern))
+			return false;
+		RoutePattern other=(RoutePattern) o;
+		return (Arrays.equals(this.yieldVector, other.yieldVector) && other.cost == this.cost && other.route.equals(this.route));
+	}
+
+	@Override
+	public int hashCode() {
+		return id;
+	}
+
+	@Override
+	public String toString() {
+		return id+" - "+"with value: "+ this.value+" Route pattern: "+Arrays.toString(yieldVector)+" actual route: "+route+" cost: "+this.cost+" reduced cost (When created): "+this.reducedCost+" creator: "+ this.creator;
+	}
+
+	
+}

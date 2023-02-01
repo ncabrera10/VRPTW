@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/cplex.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-2.0.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/jgrapht-jdk1.6.jar"/>
+	<classpathentry kind="lib" path="lib/jorlib-core-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jorlib-core-1.1.1-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/jorlib-core-1.1.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jorlib-demo-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jorlib-demo-1.1.1-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/jorlib-demo-1.1.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jorlib-demo-1.1.1-uber.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
