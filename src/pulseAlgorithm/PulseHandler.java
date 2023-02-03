@@ -62,14 +62,6 @@ public class PulseHandler {
 	private static double timeLimitPulse;
 	
 	
-	/**
-	 * Information of the paths found during the PA:
-	 */
-	private static ArrayList<ArrayList<Integer>> pathsFound_customers;
-	private static ArrayList<Double> pathsFound_costs;
-	private static ArrayList<ArrayList<Integer>> pathsFound_routes;
-	private static ArrayList<Double> pathsFound_reducedCosts;
-	
 	//For the subset row inequalities:
 	
 	private static Hashtable<Integer,Integer> numVecesSubsetRowIneq;
@@ -83,6 +75,8 @@ public class PulseHandler {
 	
 	public PulseHandler(Hashtable<Integer,Double>dualsSub,double[] duals) throws IloException, InterruptedException {
 		
+		// Initialize key variables:
+		
 		setStop(false);
 		setWasSolvedToOptimality(false);
 		setTimeLimitPulse((double) CGParameters.TIME_LIMIT_PULSE_SEC);//30.0;//30.0;//300.0 1.0; How much should we wait after finding the first solution with a negative reduced cost
@@ -94,13 +88,6 @@ public class PulseHandler {
 		numVecesSubsetRowIneq = new Hashtable<Integer,Integer>();
 		numVecesSubsetRowIneqMT = new Hashtable<String,Integer>();
 					
-		// Initializes the graph and the lists to store info of the paths found:
-		
-		pathsFound_customers = new ArrayList<ArrayList<Integer>>();
-		pathsFound_costs = new ArrayList<Double>();
-		pathsFound_reducedCosts = new ArrayList<Double>();
-		pathsFound_routes = new ArrayList<ArrayList<Integer>>();
-		
 		// For the cuts:
 		
 		Enumeration<Integer> e = dualsSub.keys();
@@ -123,17 +110,17 @@ public class PulseHandler {
 		
 		updateReducedCosts(duals);
 		
+		// Resets the final node:
+		
+		GraphManager.finalNode.reset();
+		
 		// Run bounding procedure
-		//System.out.println("Comence el bounding");
+		
 		runBoundingProcedure();
-		//System.out.println("Termine el bounding");
+		
 		// Runs the pulse algorithm
 		
 		runPulse();
-		
-		// Update arc reduced costs
-		
-		restartReducedCosts(duals);
 		
 		// Reset the nodes
 		
@@ -153,29 +140,12 @@ public class PulseHandler {
 		
 		for(int i = 0;i < DataHandler.numArcs;i++) {
 			
-			DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] = DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] - duals[DataHandler.arcs[i][0]];
 			DataHandler.costList[i] = DataHandler.distList[i]-duals[DataHandler.arcs[i][0]]; //Calculate reduced cost with the dual variable of the tail node of each arc
+			DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] = DataHandler.costList[i];
 			
 		}	
 		
 	}
-	
-	/**
-	 * This method restsarts the reduced cost of an arc
-	 * @param duals
-	 */
-	public void restartReducedCosts(double[] duals) {
-		
-		for(int i = 0;i < DataHandler.numArcs;i++) {
-			
-			DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] = DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] + duals[DataHandler.arcs[i][0]];
-			DataHandler.costList[i] = DataHandler.distList[i] + duals[DataHandler.arcs[i][0]]; //Calculate reduced cost with the dual variable of the tail node of each arc
-			
-		}
-		
-	}
-	
-	
 	
 	/**
 	 * This method resets the nodes:
@@ -237,12 +207,15 @@ public class PulseHandler {
 			for(int i=1; i<=DataHandler.n; i++){
 				GraphManager.boundsMatrix[i][timeIndex]=GraphManager.bestCost[i];				// Store the best cost found for each node into the bounds matrix	
 			}
-			
+			//System.out.println(timeIndex+" - "+GraphManager.timeIncumbent+" - "+GraphManager.PrimalBound);
 			GraphManager.overallBestCost=GraphManager.PrimalBound;					// Store the best cost found over all the nodes
 			GraphManager.timeIncumbent-=DataHandler.boundStep;						// Update the time incumbent
 			GraphManager.timeIndex = timeIndex;										// Update the last index done
 			
 		}
+		
+		//System.out.println(GraphManager.PrimalBound);
+		//System.exit(0);
 		
 		GraphManager.timeIncumbent+=DataHandler.boundStep; 				// Set time incumbent to the last value solved
 		GraphManager.PrimalBound=0;										// Reset the primal bound
@@ -270,76 +243,7 @@ public class PulseHandler {
 	}
 	
 	
-
-
-	public static ArrayList<ArrayList<Integer>> getPathsFound_customers() {
-		return pathsFound_customers;
-	}
-
-	public void setPathsFound_customers(ArrayList<ArrayList<Integer>> pathsFound_customers) {
-		PulseHandler.pathsFound_customers = pathsFound_customers;
-	}
-
-	public static ArrayList<Double> getPathsFound_costs() {
-		return pathsFound_costs;
-	}
-
-	public void setPathsFound_costs(ArrayList<Double> pathsFound_costs) {
-		PulseHandler.pathsFound_costs = pathsFound_costs;
-	}
-
-	public static ArrayList<ArrayList<Integer>> getPathsFound_routes() {
-		return pathsFound_routes;
-	}
-
-	public void setPathsFound_routes(ArrayList<ArrayList<Integer>> pathsFound_routes) {
-		PulseHandler.pathsFound_routes = pathsFound_routes;
-	}
-	
-	
-	/**
-	 * @return the pathsFound_reducedCosts
-	 */
-	public static ArrayList<Double> getPathsFound_reducedCosts() {
-		return pathsFound_reducedCosts;
-	}
-
-	/**
-	 * @param pathsFound_reducedCosts the pathsFound_reducedCosts to set
-	 */
-	public static void setPathsFound_reducedCosts(ArrayList<Double> pathsFound_reducedCosts) {
-		PulseHandler.pathsFound_reducedCosts = pathsFound_reducedCosts;
-	}
-
-	/**
-	 * This function adds the information of a path to our arrays.
-	 * @param p
-	 * @param r
-	 * @param co
-	 * @param rco_or
-	 */
-	public synchronized static void addPath(ArrayList<Integer> p,Double reducedCost,Double distance) {
-		ArrayList<Integer> new_list = new ArrayList<Integer>();
-		ArrayList<Integer> r = new ArrayList<Integer>();
-		//String r = "";
-		//for(int i = 0;i < p.size()-1;i++) {
-		//	r += "("+p.get(i)+"-"+p.get(i+1)+");";
-		//}
-		//r += "("+p.get(p.size()-1)+"-"+p.get(0)+")";
-		//if(!pathsFound_routes.contains(r)) {
-			for(int i=0;i<p.size();i++) {
-				new_list.add(p.get(i));
-				r.add(p.get(i));
-			}
-			r.add(p.get(0));
-			pathsFound_customers.add(new_list);
-			pathsFound_costs.add(distance);
-			pathsFound_routes.add(r);
-			pathsFound_reducedCosts.add(reducedCost);
-			setNumPaths(getNumPaths() + 1);
-		//}
-		
-	}
+	// ----------------------------------Auxiliary methods----------------------------------------
 
 	
 	/**

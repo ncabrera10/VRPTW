@@ -21,7 +21,6 @@ import ilog.concert.IloNumVar;
 import ilog.concert.IloObjective;
 import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
-import metaheuristics.MetaheuristicHandler;
 import parameters.GlobalParameters;
 import pulseAlgorithm.PA_PricingProblem;
 
@@ -47,12 +46,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	//ArrayList to keep track of the method that created a certain column
 	
 	public static ArrayList<Integer> generator;
-	
-	//For the tabu search:
-	
-	public static boolean firstTimeHEu = true;
-	public static MetaheuristicHandler heuristics;
-	
 	
 	/**
 	 * Number of customers
@@ -114,8 +107,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 		basisIndexes = new ArrayList<Integer>();
 		ceroRCIndexes = new ArrayList<Integer>();
 		generator = new ArrayList<Integer>();
-		heuristics = new MetaheuristicHandler();
-		
+
 		//Initialize the dual variables values:
 		
 		duals = new double[N+1];
@@ -351,9 +343,10 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			for(int i = 0;i < N; i++) {
 				
 				duals[i+1] = duals_1[i];
-				
+				//System.out.println((i+1)+" - "+duals_1[i]);
 			}
-
+			//System.exit(0);
+			
 			//Subset row inequalities
 			
 			duals_subset = new Hashtable<Integer,Double>();
@@ -409,10 +402,10 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			}
 			
 			//Create the variable and store it
-			IloNumVar var= cplex.numVar(iloColumn, 0, Double.MAX_VALUE, "z_"+","+column.id);
+			IloNumVar var= cplex.numVar(iloColumn, 0, 1, "z_"+","+column.id);
 			cplex.add(var);
 			masterData.addColumn(column, var);
-			
+			//paths.add(column);
 			
 		} catch (IloException e) {
 			e.printStackTrace();

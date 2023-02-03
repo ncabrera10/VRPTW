@@ -1,0 +1,11 @@
+Instance:RC-102_100
+Configuration:1_4
+UpperBound:1529.2999999999997
+LowerBound:1406.2618363437323
+GAP:8.045390940709309
+Iterations:69
+NumberOfColumns:1316
+NumberOfColumns_IniStep:200
+NumberOfColumns_Additional:1116
+NumberOfCuts:0
+ComputationalTime:2.534484641

@@ -208,7 +208,9 @@ public class DataHandler {
 		demand[0]=(int)(Double.parseDouble(stringReader[3]));
 		tw_a[0]= (int)(Double.parseDouble(stringReader[4]));
 		tw_b[0]= (int)(Double.parseDouble(stringReader[5]));
+		
 		CGParameters.BOUND_LOWER_TIME_PULSE = (int) (tw_b[0]*0.2);
+		
 		G = new GraphManager(n+1); 
 		int auxNumArcs = (n+1)*(n+1)-(n+1);
 		G.addVertex(new Node(0,demand[0],service[0],-tw_b[0],tw_b[0]));

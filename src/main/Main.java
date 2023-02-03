@@ -46,7 +46,7 @@ public class Main {
 		
 		// Select the instance number: 101, 102..208
 		
-		int instanceNumber = 104;
+		int instanceNumber = 105;
 		
 		// Extension of the file
 		
@@ -58,7 +58,7 @@ public class Main {
 		
 		// Number of nodes in the instance
 		
-		int numNodes = 50;
+		int numNodes = 50; //25; 50; 100;
 		
 		// Select the implementation 
 			//Type 1:CG

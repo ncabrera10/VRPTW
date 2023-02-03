@@ -82,6 +82,7 @@ public class Solver {
 		// Current BAP node
 			
 			VRPTW.stillAtTheRootNode = true;
+			CGParameters.USE_SUBSET_ROW_INEQ = false;
 			
 		// Creates a VRPTW solver
 			

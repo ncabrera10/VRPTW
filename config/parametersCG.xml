@@ -3,10 +3,10 @@
 <properties>
 
 <entry key="PRINT_IN_CONSOLE">false</entry> 
-<entry key="MAX_PATHS_PER_ITERATION">400</entry>
+<entry key="MAX_PATHS_PER_ITERATION">4000</entry>
 <entry key="BAP_TIME_LIMIT_SEC">7200</entry> 
 
-<entry key="TIME_LIMIT_PULSE_SEC">15</entry> 
+<entry key="TIME_LIMIT_PULSE_SEC">10</entry> 
 <entry key="PULSE_NUM_THREADS">4</entry> 
 <entry key="BOUND_STEP_PULSE">10</entry> 
 <entry key="BOUND_LOWER_TIME_PULSE">100</entry> 
@@ -16,9 +16,6 @@
 <entry key="MIN_SUBSET_ROW_INEQ_VIOL">0.1</entry> 
 <entry key="MAX_SUBSET_ROW_INEQ_PERCUSTOMER">5</entry> 
 <entry key="MAX_SUBSET_ROW_INEQ_ROOTNODE">1000</entry> 
-
-<entry key="MAX_ITERATIONS_TS">10</entry> 
-<entry key="NUM_ITERATIONS_TS">0</entry> 
 
 
 

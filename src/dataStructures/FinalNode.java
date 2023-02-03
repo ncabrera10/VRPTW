@@ -1,6 +1,7 @@
 package dataStructures;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import parameters.CGParameters;
 import parameters.GlobalParameters;
@@ -68,18 +69,12 @@ public class FinalNode extends Node {
 	 * Best solution distance
 	 */
 	double PathDist;	
-	
-	// Additional variables for the tabu search:
-	
-	public double arrivalTime;//Arrival time to the node in the solution
-	public double exitTime; //max(arrivalTime, tw_a)+ service
-	public int route;//Route in which the node is visited
-	public int visited;//Position in the route
-
-	public double cumulativeDist;
-	public double cumulativeCost;
-	public int tw_w;//time window width
 		
+	// The current pool of paths found 
+	
+	public Hashtable<String, Double> routesPoolDist;
+	public Hashtable<String, Double> routesPoolRC;
+	public ArrayList<String> pool;
 	
 	/** Class constructor
 	 * @param i Node id
@@ -95,19 +90,31 @@ public class FinalNode extends Node {
 		service = s;
 		tw_a = a;
 		tw_b = b;	
-		tw_w = b-a;
-		arrivalTime = -1;
-		exitTime = -1;
-		route = -1;
-		visited = -1;
 		magicIndex = new ArrayList<Integer>();
 		Path= new ArrayList<Integer>();
+		pool = new ArrayList<String>();
+		routesPoolDist = new Hashtable<String, Double>();
+		routesPoolRC  = new Hashtable<String, Double>();
+		
 	}
 	
-	/* Override for the bounding procedure
+	/**
+	 * This method resets the current pool
+	 */
+	public void reset() {
+		pool = new ArrayList<String>();
+		routesPoolDist = new Hashtable<String, Double>();
+		routesPoolRC  = new Hashtable<String, Double>();
+	}
+	
+	
+	/**
+	 * Pulse bound procedure
 	 */
 	public void pulseBound(double PLoad, double PTime, double PCost, ArrayList<Integer> path, int Root, double PDist) {
+		
 		// If the path is feasible update values for the bounding matrix and primal bound
+		
 		if (PLoad <= DataHandler.Q && (PTime) <= tw_b) {
 
 			if ((PCost) < GraphManager.bestCost[Root]) {
@@ -124,13 +131,12 @@ public class FinalNode extends Node {
 
 	}
 	
-	/* Override for the pulse procedure
+	/**
+	 * Pulse multi-thread procedure
 	 */
 	public synchronized void pulseMT(double PLoad, double PTime, double PCost, ArrayList<Integer> path, double PDist, int thread) {
+		
 		// If the path is feasible and better than the best known solution update the best known solution and primal bound	
-		//if(CGParameters.PRINT_IN_CONSOLE) {
-		//	System.out.println(PLoad+" - "+PTime+" - "+PCost+" - "+path.toString()+" - "+PDist+" - "+thread+" - "+GraphManager.PrimalBound+" - "+PulseHandler.getNumPaths());
-		//}
 		
 		if (PLoad <= DataHandler.Q && (PTime) <= tw_b) {
 				
@@ -146,15 +152,27 @@ public class FinalNode extends Node {
 					}
 					
 					this.Path.add(id);
-					//if(CGParameters.PRINT_IN_CONSOLE) {
-					//	System.out.println(PLoad+" - "+PTime+" - "+PCost+" - "+path.toString()+" - "+PDist+" - "+thread+" - "+GraphManager.PrimalBound+" - "+PulseHandler.getNumPaths());
-					//}
-					PulseHandler.addPath(path, PCost, PDist);
-					PulseHandler.setPruneHarder(0);
-					PulseHandler.setPrimalBound(PCost);
-					if(PulseHandler.getNumPaths() > CGParameters.MAX_PATHS_PER_ITERATION) {
-						PulseHandler.setStop(true);
+					
+					if(PCost < 0) {
+						
+						String keyS = this.Path.toString();
+						if(!routesPoolRC.containsKey(keyS)) {
+							routesPoolRC.put(keyS,PCost);
+							routesPoolDist.put(keyS,PDist);
+							pool.add(keyS);
+							PulseHandler.setPruneHarder(0);
+							PulseHandler.setPrimalBound(PCost);
+							PulseHandler.setNumPaths(PulseHandler.getNumPaths()+1);
+							if(PulseHandler.getNumPaths() > CGParameters.MAX_PATHS_PER_ITERATION) {
+								PulseHandler.setStop(true);
+							}
+						}
+						
+						
 					}
+					
+					
+					
 				}
 		
 
@@ -184,53 +202,7 @@ public class FinalNode extends Node {
 	public Object clone() {
 		return super.clone();
 	}
-	@SuppressWarnings("unused")
-	private void SortF(ArrayList<Double> set) {
-		QSF(set, 0, set.size() - 1);
-	}
+	
 
-	/**
-	 * Put method
-	 * @param e
-	 * @param b
-	 * @param t
-	 * @return
-	 */
-	public int putEndNode(ArrayList<Double> e, int b, int t) {
-		int i;
-		int pivot;
-		double pivotVal;
-		double temp;
-
-		pivot = b;
-		pivotVal = e.get(pivot) ;
-		for (i = b + 1; i <= t; i++) {
-			if (  e.get(i) < pivotVal) {
-				pivot++;
-				temp = e.get(i);
-				e.set(i, e.get(pivot));
-				e.set(pivot,temp);
-			}
-		}
-		temp =  e.get(b);
-		e.set(b, e.get(pivot));
-		e.set(pivot,temp);
-		return pivot;
-	}
-
-	/**
-	 * QSF
-	 * @param e
-	 * @param b
-	 * @param t
-	 */
-	public void QSF(ArrayList<Double> e, int b, int t) {
-		int pivot;
-		if (b < t) {
-			pivot = putEndNode(e, b, t);
-			QSF(e, b, pivot - 1);
-			QSF(e, pivot + 1, t);
-		}
-	}
 
 }

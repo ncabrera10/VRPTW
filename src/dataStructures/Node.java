@@ -55,18 +55,7 @@ public class Node implements Cloneable{
 	
 	private ArrayList<Integer> subsetRow_ids;
 	
-	// Additional variables for the tabu search:
-	
-	public double arrivalTime;//Arrival time to the node in the solution
-	public double exitTime; //max(arrivalTime, tw_a)+ service
-	public int route;//Route in which the node is visited
-	public int visited;//Position in the route
 
-	public double cumulativeDist;
-	public double cumulativeCost;
-	public int tw_w;//time window width
-	
-	
 	/** Class constructor
 	 * @param i Node number
 	 * @param d Node demand
@@ -80,11 +69,6 @@ public class Node implements Cloneable{
 		service = s;
 		tw_a = a;
 		tw_b = b;	
-		tw_w = b-a;
-		arrivalTime = -1;
-		exitTime = -1;
-		route = -1;
-		visited = -1;
 		magicIndex = new ArrayList<>();
 		subsetRow_ids = new ArrayList<Integer>();
 	}
@@ -337,8 +321,7 @@ double Bound=0;
 // If the time consumed is less than the last time incumbent solved and the node id is larger than the current root node being explored it means that there is no lower bound available and we must use the naive bound 
 if(time<GraphManager.timeIncumbent+DataHandler.boundStep && this.id>=root){
 	Bound=((GraphManager.timeIncumbent+DataHandler.boundStep-time)*GraphManager.naiveDualBound+GraphManager.overallBestCost);
-	//Bound = Double.NEGATIVE_INFINITY;
-
+	
 }
 
 else {

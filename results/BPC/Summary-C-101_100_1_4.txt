@@ -1,0 +1,11 @@
+Instance:C-101_100
+Configuration:1_4
+UpperBound:827.3000000000001
+LowerBound:827.3000000000001
+GAP:0.0
+Iterations:150
+NumberOfColumns:2220
+NumberOfColumns_IniStep:200
+NumberOfColumns_Additional:2020
+NumberOfCuts:0
+ComputationalTime:1.736869057

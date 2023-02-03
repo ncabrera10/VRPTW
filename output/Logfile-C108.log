@@ -1,0 +1,2 @@
+BAPNodeID 	 parentNodeID 	 objectiveIncumbentSolution 	 nodeBound 	 nodeValue 	 cgIterations 	 t_master 	 t_pricing 	 nrGenColumns 	 solutionStatus 	 nodesInQueue 	 decision 	 fixedArcs 	 removedArcs
+0	-1	1.7976931348623157E308	827.3000000000002	827.30	244	1332	3588	4140	INTEGER	0	unknown		

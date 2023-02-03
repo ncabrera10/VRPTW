@@ -1,11 +1,11 @@
 Instance:C-104_50
 Configuration:1_4
-UpperBound:357.99999999999994
-LowerBound:357.99999999999994
+UpperBound:358.0
+LowerBound:358.0
 GAP:0.0
-Iterations:86
-NumberOfColumns:2294
+Iterations:106
+NumberOfColumns:2766
 NumberOfColumns_IniStep:100
-NumberOfColumns_Additional:2194
+NumberOfColumns_Additional:2666
 NumberOfCuts:0
-ComputationalTime:59.967421343
+ComputationalTime:86.545159605

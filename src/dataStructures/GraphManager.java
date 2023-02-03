@@ -1,5 +1,6 @@
 package dataStructures;
 
+import columnGeneration.VRPTW;
 
 public class GraphManager {
 
@@ -87,11 +88,17 @@ public class GraphManager {
 	
 	//This method finds the best arc regarding the cost/time ratio
 	public static void  calNaiveDualBound() {
-		GraphManager.naiveDualBound=-Double.POSITIVE_INFINITY;
-		//for (int i = 0; i < DataHandler.numArcs; i++) {
-		//	if(DataHandler.timeList[i]!=0 && DataHandler.costList[i]/DataHandler.timeList[i]<=GraphManager.naiveDualBound ){
-		//		GraphManager.naiveDualBound=DataHandler.costList[i]/DataHandler.timeList[i];
-		//		}
-		//}
+		if(VRPTW.numInequalities == 0) {
+
+			GraphManager.naiveDualBound=Double.POSITIVE_INFINITY;
+			for (int i = 0; i < DataHandler.numArcs; i++) {
+				if(DataHandler.timeList[i]!=0 && DataHandler.costList[i]/DataHandler.timeList[i]<=GraphManager.naiveDualBound ){
+					GraphManager.naiveDualBound=DataHandler.costList[i]/DataHandler.timeList[i];
+					}
+			}
+		}
+		else {
+			GraphManager.naiveDualBound=-Double.POSITIVE_INFINITY;
+		}
 	}
 }

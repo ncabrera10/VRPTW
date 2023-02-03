@@ -7,7 +7,9 @@ import org.jorlib.frameworks.columnGeneration.io.TimeLimitExceededException;
 import org.jorlib.frameworks.columnGeneration.master.OptimizationSense;
 import org.jorlib.frameworks.columnGeneration.pricing.AbstractPricingProblemSolver;
 
+import dataStructures.DataHandler;
 import pulseAlgorithm.PA_PricingProblem;
+import pulseAlgorithm.PA_Solver;
 
 /**
  * This method runs the column generation procedure.
@@ -26,7 +28,11 @@ public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, 
 	 */
 	@Override
 	protected double calculateBoundOnMasterObjective(Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PA_PricingProblem>> solver) {
-		return 0.0; //In the current implementation we do not worry about this calculation. But we could..
+		if(PA_Solver.solvedToOptimality) {
+			return PA_Solver.objectiveFunction * DataHandler.n + objectiveMasterProblem ;//This bound was proposed by Parragh and Cordeau (2017)
+		}else {
+			return 0.0;
+		}
 	}
 
 	
@@ -73,8 +79,7 @@ public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, 
 			//For all the remaining iterations:
 			
 			this.invokeMaster(timeLimit);
-			((Master) master).replaceActualDuals();
-			
+
 			// Updates the dual variables
 			
 			((Master) master).replaceActualDuals();
