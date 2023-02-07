@@ -191,12 +191,23 @@ public final class BranchAndPrice extends AbstractBranchAndPrice<VRPTW,RoutePatt
 	}
 	
 	/**
-	 * Returns the lower bound (taking into account all the nodes we have explored so far).
+	 * Returns the upper bound (taking into account all the nodes we have explored so far).
 	 * @return
 	 */
 	public double getUpperBoundOnObjective() {
 		return(this.upperBoundOnObjective);
 	}
 
+	/**
+	 * This method updates the incumbent solution
+	 * @param objectiveValue
+	 * @param solution
+	 */
+	public void updateIncumbent(double objectiveValue, List<RoutePattern> solution){
+        this.objectiveIncumbentSolution = objectiveValue;
+        this.upperBoundOnObjective = objectiveValue;
+        this.incumbentSolution = solution;
+    }
+	
 	
 }

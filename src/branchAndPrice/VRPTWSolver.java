@@ -126,6 +126,9 @@ public final class VRPTWSolver {
 		//Create a branch and price instance 
 		BranchAndPrice bap = new BranchAndPrice(dataModel,master,pricingProblems,solvers,branchCreators,upperBound,initSolution);
 		
+		//Create the listener for the integer heuristic
+		IntegerHeuristic integerHeuristic = new IntegerHeuristic(bap);
+		bap.addBranchAndPriceEventListener(integerHeuristic);
 		
 		/**
 		 * The ColGen class manages the entire procedure by invoking the MP and PP iteratively. 

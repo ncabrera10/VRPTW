@@ -405,7 +405,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			IloNumVar var= cplex.numVar(iloColumn, 0, 1, "z_"+","+column.id);
 			cplex.add(var);
 			masterData.addColumn(column, var);
-			//paths.add(column);
+			paths.add(column);
 			
 		} catch (IloException e) {
 			e.printStackTrace();

@@ -46,7 +46,7 @@ public class Main {
 		
 		// Select the instance number: 101, 102..208
 		
-		int instanceNumber = 105;
+		int instanceNumber = 104;
 		
 		// Extension of the file
 		
