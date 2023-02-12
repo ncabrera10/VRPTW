@@ -1,6 +1,7 @@
 package dataStructures;
 
 import java.util.ArrayList;
+
 /** This class is used for the multithread tasking.
 
  * Ref.: Lozano, L., Duque, D., and Medaglia, A. L. (2013). 

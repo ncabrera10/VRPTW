@@ -1,0 +1,11 @@
+Instance:C-103_50
+Configuration:1_4
+UpperBound:361.4
+LowerBound:361.4
+GAP:0.0
+Iterations:98
+NumberOfColumns:1641
+NumberOfColumns_IniStep:100
+NumberOfColumns_Additional:1541
+NumberOfCuts:0
+ComputationalTime:2.773127915

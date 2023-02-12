@@ -3,6 +3,11 @@ import java.util.ArrayList;
 
 import dataStructures.Node;
 
+/**
+ * Class to quickly clone an arraylist.
+ * @author Daniel Duque
+ *
+ */
 public class Clonetor {
 	
 	

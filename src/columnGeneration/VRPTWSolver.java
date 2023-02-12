@@ -24,12 +24,14 @@ import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
-import pulseAlgorithm.PA_PricingProblem;
-import pulseAlgorithm.PA_Solver;
+import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PA_Solver;
 
 /**
- * Simple solver class which solves the PLRP Problem through Column Generation.
+ * Simple solver class which solves the VRPTW Problem through Column Generation.
  * 
+ * @author nicolas.cabrera-malik
+ *
  */
 public final class VRPTWSolver {
 
@@ -147,7 +149,6 @@ public final class VRPTWSolver {
 		try {
 			printFinalIntegerSolution(master.getAllColumns());
 		} catch (IloException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

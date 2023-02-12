@@ -7,8 +7,8 @@ import org.jorlib.frameworks.columnGeneration.branchAndPrice.branchingDecisions.
 import org.jorlib.frameworks.columnGeneration.master.cutGeneration.AbstractInequality;
 
 import columnGeneration.VRPTW;
+import pricingAlgorithms.PA_PricingProblem;
 import columnGeneration.RoutePattern;
-import pulseAlgorithm.PA_PricingProblem;
 
 /**
  * This class implements the remove arc branching decision.

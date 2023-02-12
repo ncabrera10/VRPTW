@@ -197,7 +197,7 @@ public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,VRP
 		if(numCuts == 0) {
 			return(Collections.emptyList());
 		}else {
-			VRPTW.cutIterationAtCurrentBAPNode++;
+			VRPTW.cutIterationAtCurrentBAPNode+=inequalities.size();
 			return new ArrayList<>(inequalities);
 		}
 

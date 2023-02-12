@@ -1,4 +1,4 @@
-package pulseAlgorithm;
+package pricingAlgorithms;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -14,7 +14,7 @@ import parameters.CGParameters;
 
 /**
  * This is the main class to run the auxiliary problem. It coordinates the pulse.
- * @author nick0
+ * @author nicolas cabrera
  *
  */
 public class PulseHandler {
@@ -26,7 +26,7 @@ public class PulseHandler {
 	private static double primalBound;
 	
 	/**
-	 * Number of paths found so far
+	 * Number of paths found so far in a given iteration of the pricing algorithm
 	 */
 	
 	private static int numPaths;
@@ -38,7 +38,7 @@ public class PulseHandler {
 	private static boolean stop;
 	
 	/**
-	 * Boolean indicator: can we stop the pulse now? (Heuristically)
+	 * Boolean indicator: was the pricing algorithm solved to optimality?
 	 */
 	
 	private static boolean wasSolvedToOptimality;
@@ -50,25 +50,33 @@ public class PulseHandler {
 	private static double ITime;
 	
 	/**
-	 * Time to prune harder: 0:prunes a lot more !
+	 * Boolean variable, that allows to start pruning harder (while solving the pulse heuristically)
+	 * 0: Prunes more paths (heuristically)
+	 * 1: normal behavior of the pulse
 	 */
 	
 	private static int pruneHarder;
 	
 	/**
-	 * Pulse time limit in seconds (if already found a solution with negative reduced cost)
+	 * Pulse time limit in seconds (while solving the pulse heuristically)
 	 */
 	
 	private static double timeLimitPulse;
 	
 	
-	//For the subset row inequalities:
+	/**
+	 * Number of times a certain triplet of customers has been visited
+	 */
 	
 	private static Hashtable<Integer,Integer> numVecesSubsetRowIneq;
+	
+	/**
+	 * Number of times a certain triplet of customers has been visited (MT version)
+	 */
 	private static Hashtable<String,Integer> numVecesSubsetRowIneqMT;	
 		
 	/**
-	 * This method creates an instance of a pulse handler (The auxiliary problem)
+	 * This method creates an instance of a pulse handler
 	 * @throws IloException 
 	 * @throws InterruptedException 
 	 */
@@ -79,7 +87,7 @@ public class PulseHandler {
 		
 		setStop(false);
 		setWasSolvedToOptimality(false);
-		setTimeLimitPulse((double) CGParameters.TIME_LIMIT_PULSE_SEC);//30.0;//30.0;//300.0 1.0; How much should we wait after finding the first solution with a negative reduced cost
+		setTimeLimitPulse((double) CGParameters.TIME_LIMIT_PULSE_SEC);
 		setPruneHarder(1);
 		setPrimalBound(0);
 		
@@ -153,14 +161,17 @@ public class PulseHandler {
 	
 	public void resetNodes() {
 		
+		// Resets the indicator variable that allows for sorting the arcs based on the reduced cost
+		
 		for(int i = 0; i<DataHandler.n ; i++) {
 			
 			GraphManager.nodes[i].firstTime = true;
 			
 		}
 		
+		// Resets the key variables for heuristic pruning
+		
 		setStop(false);
-		setTimeLimitPulse((double) CGParameters.TIME_LIMIT_PULSE_SEC);//30.0;//30.0;//300.0 1.0; How much should we wait after finding the first solution with a negative reduced cost
 		setPruneHarder(1);
 	
 	}
@@ -172,53 +183,81 @@ public class PulseHandler {
 		
 		GraphManager.visited = new int[DataHandler.n+1];
 		GraphManager.visitedMT = new int[DataHandler.n+1][DataHandler.numThreads+1];
-		GraphManager.boundsMatrix= new double [DataHandler.n+1][(int) Math.ceil((double)DataHandler.tw_b[0]/DataHandler.boundStep)+1];
-		GraphManager.bestCost= new double [DataHandler.n+1];
+		GraphManager.boundsMatrix = new double [DataHandler.n+1][(int) Math.ceil((double)DataHandler.tw_b[0]/DataHandler.boundStep)+1];
+		GraphManager.bestCost = new double [DataHandler.n+1];
 		for(int i=1; i<DataHandler.n+1; i++){
-			GraphManager.bestCost[i]=Double.POSITIVE_INFINITY;
+			GraphManager.bestCost[i] = Double.POSITIVE_INFINITY;
 		}
 		
-		GraphManager.PrimalBound= 0;
-		GraphManager.overallBestCost=0;
+		GraphManager.PrimalBound = 0;
+		GraphManager.overallBestCost = 0;
 	}
 	
 	//Pulse functions:
 	
 	/**
-	 * This method runs the bounding procedure with or without walking arcs
-	 * @param type 1: with walking arcs 2:without walking arcs
+	 * This method runs the bounding procedure
 	 * @throws IloException 
 	 */
 	public void runBoundingProcedure() throws IloException {
 
-		GraphManager.calNaiveDualBound();									// Calculate a naive lower bound
-		GraphManager.timeIncumbent=GraphManager.nodes[0].tw_b;				// Capture the depot upper time window
-		int lowerTimeLimit = CGParameters.BOUND_LOWER_TIME_PULSE; 											// Lower time (resource) limit to stop the bounding procedure. For 100-series we used 50 and for 200-series we used 100;		
-		int timeIndex=0;													// Index to store the bounds
+		// Calculates a naive dual bound based on the current network:
 		
-		while(GraphManager.timeIncumbent>=lowerTimeLimit){					// Check the termination condition
+		GraphManager.calNaiveDualBound();									
+		
+		// Captures the depot upper time window:
+		
+		GraphManager.timeIncumbent = GraphManager.nodes[0].tw_b;				
+		
+		// Sets the lower time limit:
+		
+		int lowerTimeLimit = CGParameters.BOUND_LOWER_TIME_PULSE; 
+		
+		// Index to store the bounds:
+		
+		int timeIndex=0;												
+		
+		// While we have not reached the lower time limit:
+		
+		while(GraphManager.timeIncumbent >= lowerTimeLimit){
 			
-			timeIndex=(int) Math.ceil((GraphManager.timeIncumbent/DataHandler.boundStep));		// Calculate the current index
+			// Calculate the current index:
+			
+			timeIndex=(int) Math.ceil((GraphManager.timeIncumbent/DataHandler.boundStep));		
+			
+			// Propagate a pulse from every node:
 			
 			for (int i = 1; i <= DataHandler.n; i++) {					
 				GraphManager.nodes[i].pulseBound(0, GraphManager.timeIncumbent, 0 , new ArrayList<Integer>(), i,0); 	// Solve an ESPPRC for all nodes given the time incumbent 
 			}
 			
+			// Store the best cost found for each node:
+			
 			for(int i=1; i<=DataHandler.n; i++){
-				GraphManager.boundsMatrix[i][timeIndex]=GraphManager.bestCost[i];				// Store the best cost found for each node into the bounds matrix	
+				GraphManager.boundsMatrix[i][timeIndex] = GraphManager.bestCost[i];
 			}
-			//System.out.println(timeIndex+" - "+GraphManager.timeIncumbent+" - "+GraphManager.PrimalBound);
-			GraphManager.overallBestCost=GraphManager.PrimalBound;					// Store the best cost found over all the nodes
-			GraphManager.timeIncumbent-=DataHandler.boundStep;						// Update the time incumbent
-			GraphManager.timeIndex = timeIndex;										// Update the last index done
+			
+			// Store the best overall cost (considering all nodes): 
+			
+			GraphManager.overallBestCost = GraphManager.PrimalBound;	
+			
+			// Update the time incumbent:
+			
+			GraphManager.timeIncumbent -= DataHandler.boundStep;
+			 
+			// Update the last time index:
+			
+			GraphManager.timeIndex = timeIndex;
 			
 		}
 		
-		//System.out.println(GraphManager.PrimalBound);
-		//System.exit(0);
+		// Set the time incumbent to the last value:
 		
-		GraphManager.timeIncumbent+=DataHandler.boundStep; 				// Set time incumbent to the last value solved
-		GraphManager.PrimalBound=0;										// Reset the primal bound
+		GraphManager.timeIncumbent += DataHandler.boundStep;
+		
+		// Resets the primal bound:
+		
+		GraphManager.PrimalBound = 0;
 		
 	}
 	
@@ -233,13 +272,22 @@ public class PulseHandler {
 	 */
 	public void runPulse() throws IloException, InterruptedException {
 		
+		// Starts the clock for the pulse:
+		
 		setITime((double) System.nanoTime());
-		GraphManager.nodes[0].pulseMT(0, 0, 0, new ArrayList<Integer>(),0,0); 	// Run the pulse procedure on the source node
+		
+		// Runs the pulse from the source node:
+		
+		GraphManager.nodes[0].pulseMT(0, 0, 0, new ArrayList<Integer>(),0,0); 
+		
+		// Checks if we solved the pulse to optimality or not:
+		
 		if(!stop) {
 			wasSolvedToOptimality = true;
 		}else {
 			wasSolvedToOptimality = false;
 		}
+		
 	}
 	
 	

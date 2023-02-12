@@ -31,8 +31,8 @@ import org.jorlib.frameworks.columnGeneration.branchAndPrice.EventHandling.*;
 import org.jorlib.frameworks.columnGeneration.branchAndPrice.branchingDecisions.BranchingDecision;
 
 import columnGeneration.VRPTW;
+import pricingAlgorithms.PA_PricingProblem;
 import columnGeneration.RoutePattern;
-import pulseAlgorithm.PA_PricingProblem;
 
 import java.io.BufferedWriter;
 import java.io.File;

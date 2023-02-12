@@ -21,8 +21,8 @@ import columnGeneration.Master;
 import columnGeneration.VRPTW;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
+import pricingAlgorithms.PA_PricingProblem;
 import columnGeneration.RoutePattern;
-import pulseAlgorithm.PA_PricingProblem;
 
 /**
  * This class extends the abstract branch and price class.

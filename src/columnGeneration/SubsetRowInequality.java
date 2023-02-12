@@ -15,16 +15,41 @@ public class SubsetRowInequality extends AbstractInequality implements Comparabl
 	/** Vertices in the cut set **/
 	public final ArrayList<Integer> cutSet;
 	
+	/**
+	 * List of routes that visit 2 or more customers of the triplet:
+	 */
 	public ArrayList<RoutePattern> routes;
 	
+	/**
+	 * Coefficient for each route in the inequality:
+	 */
 	public ArrayList<Integer> coefficients;
 	
+	/**
+	 * Routes id's for the routes that visit 2 or more customers of the triplet
+	 */
 	public ArrayList<Integer> routes_ids;
 	
+	/**
+	 * Id of this inequality
+	 */
 	public final int id;
 	
+	/**
+	 * Violation when added to the MP
+	 */
 	public final double violation;
 	
+	/**
+	 * This method creates a new subset row inequality object
+	 * @param maintainingGenerator
+	 * @param cutSet
+	 * @param routes
+	 * @param coefficients
+	 * @param id
+	 * @param viol
+	 * @param routes_id
+	 */
 	public SubsetRowInequality(AbstractCutGenerator<VRPTW,VRPTWMasterData> maintainingGenerator, ArrayList<Integer> cutSet,ArrayList<RoutePattern> routes,ArrayList<Integer>coefficients,int id,double viol,ArrayList<Integer>routes_id) {
 		super(maintainingGenerator);
 		this.cutSet=cutSet;

@@ -22,7 +22,7 @@ import ilog.concert.IloObjective;
 import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
 import parameters.GlobalParameters;
-import pulseAlgorithm.PA_PricingProblem;
+import pricingAlgorithms.PA_PricingProblem;
 
 /**
  * This is an implementation of the master problem. 
@@ -38,12 +38,9 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	private IloObjective obj; //Objective function
 	private IloRange[] satisfyDemandConstr; //Constraint
 	
-	//Criteria to accept a column:
-	
-	public static double rcCriteriaHeuristics = -0.1;
-	public static double rcCriteriaExact = -0.1;
-	
-	//ArrayList to keep track of the method that created a certain column
+	/**
+	 * ArrayList to keep track of the method that created a certain column
+	 */
 	
 	public static ArrayList<Integer> generator;
 	
@@ -73,6 +70,12 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	 */
 	private static double[] duals;
 	
+
+	/**
+	 * Dual variables corresponding to the subset row inequalities:
+	 */
+	private static Hashtable<Integer,Double> duals_subset;
+			
 	/**
 	 * Stores the id of the last path
 	 */
@@ -84,10 +87,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	
 	private static Hashtable<String,Integer> chainPaths;
 	
-	//Subset row inequalities:
-	
-	private static Hashtable<Integer,Double> duals_subset;
-			
 	/** Constructor: receives our data model and a reference to our pricing problem**/
 	public Master(VRPTW modelData, PA_PricingProblem pricingProblem, CutHandler<VRPTW,VRPTWMasterData> cutHandler) {
 		super(modelData, pricingProblem, cutHandler,OptimizationSense.MINIMIZE);
@@ -268,10 +267,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			cplex.setParam(IloCplex.DoubleParam.TiLim, timeRemaining); //set time limit in seconds
 			//Potentially export the model
 			if(config.EXPORT_MODEL) cplex.exportModel(config.EXPORT_MASTER_DIR+"master_"+this.getIterationCount()+".lp");
-			//cplex.exportModel("./auxiliar/master_test"+this.getIterationCount()+".lp");
-			//cplex.exportModel("./auxiliar/master_test"+".lp");
-			//cplex.exportModel("./auxiliar/master_test_"+PLRP.bapNodeID+"-"+PLRP.cutIterationAtCurrentBAPNode+".lp");
-			
+
 			//Solve the model
 			if(!cplex.solve() || cplex.getStatus()!=IloCplex.Status.Optimal){
 				if(cplex.getCplexStatus()==IloCplex.CplexStatus.AbortTimeLim) //Aborted due to time limit
@@ -343,16 +339,14 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			for(int i = 0;i < N; i++) {
 				
 				duals[i+1] = duals_1[i];
-				//System.out.println((i+1)+" - "+duals_1[i]);
+				
 			}
-			//System.exit(0);
 			
 			//Subset row inequalities
 			
 			duals_subset = new Hashtable<Integer,Double>();
 			for(SubsetRowInequality subsetRowInequality:masterData.subsetRowInequalities.keySet()) {
 				duals_subset.put(subsetRowInequality.id,cplex.getDual(masterData.subsetRowInequalities.get(subsetRowInequality)));
-				//System.out.println(subsetRowInequality+" - "+subsetRowInequality.id+" - "+duals_subset.get(subsetRowInequality.id));
 			}
 			
 		} catch (Exception e) {
@@ -370,8 +364,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	@Override
 	public void addColumn(RoutePattern column) {
 		try {
-			//System.out.println("Adding column: "+column);
-	
+
 			//Register column with objective
 			IloColumn iloColumn= cplex.column(obj,column.cost);
 
@@ -380,7 +373,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 				iloColumn=iloColumn.and(cplex.column(satisfyDemandConstr[i], column.yieldVector[i]));
 			}
 				
-			
+			//Account for the subset row inequalities:
 			for(SubsetRowInequality subsetRowInequality:masterData.subsetRowInequalities.keySet()) {
 				int cuenta = 0;
 				if(!subsetRowInequality.containsRoute(column.id)) {
@@ -488,7 +481,49 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			e.printStackTrace();
 		}
 	}
+	
+	/** Checks whether there are any violated inequalities, thereby invoking the cut handler
+	 * @return true if violated inqualities have been found (and added to the master problem)
+	 */
+	@Override
+	public boolean hasNewCuts() {
+		ArrayList<RoutePattern> solution=new ArrayList<>();
+		try {
+			RoutePattern[] routePatterns=masterData.getVarMap().getKeysAsArray(new RoutePattern[masterData.getNrColumns()]);
+			IloNumVar[] vars=masterData.getVarMap().getValuesAsArray(new IloNumVar[masterData.getNrColumns()]);
+			double[] values= cplex.getValues(vars);
 
+			//Iterate over each column and add it to the solution if it has a non-zero value
+			for(int i=0; i<routePatterns.length; i++){
+				routePatterns[i].value=values[i];
+				if(values[i]>=config.PRECISION){
+					solution.add(routePatterns[i]);
+					//System.out.println(routePatterns[i]);
+				}
+			}
+			
+		} catch (IloException e) {
+			e.printStackTrace();
+		}
+		masterData.currentSolution = solution;
+		return super.hasNewCuts();
+	}
+
+	@Override
+	public void branchingDecisionPerformed(@SuppressWarnings("rawtypes") BranchingDecision bd) {
+		this.close();
+		masterData = this.buildModel();
+		cutHandler.setMasterData(masterData); //Inform the cutHandler about the new master model
+	}
+
+
+	@Override
+	public void branchingDecisionReversed(@SuppressWarnings("rawtypes") BranchingDecision bd) {
+		// No action required
+	}
+
+	// Auxiliary methods: 
+	
 	public static int getN() {
 		return N;
 	}
@@ -530,18 +565,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	}
 
 	
-	@Override
-	public void branchingDecisionPerformed(@SuppressWarnings("rawtypes") BranchingDecision bd) {
-		this.close();
-		masterData = this.buildModel();
-		cutHandler.setMasterData(masterData); //Inform the cutHandler about the new master model
-	}
-
-
-	@Override
-	public void branchingDecisionReversed(@SuppressWarnings("rawtypes") BranchingDecision bd) {
-		// No action required
-	}
+	
 
 	/**
 	 * @return the duals_subset
@@ -550,35 +574,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 		return duals_subset;
 	}
 	
-
-	/**
-	 * Checks whether there are any violated inequalities, thereby invoking the cut handler
-	 * @return true if violated inqualities have been found (and added to the master problem)
-	 */
-	@Override
-	public boolean hasNewCuts() {
-		ArrayList<RoutePattern> solution=new ArrayList<>();
-		try {
-			RoutePattern[] routePatterns=masterData.getVarMap().getKeysAsArray(new RoutePattern[masterData.getNrColumns()]);
-			IloNumVar[] vars=masterData.getVarMap().getValuesAsArray(new IloNumVar[masterData.getNrColumns()]);
-			double[] values= cplex.getValues(vars);
-
-			//Iterate over each column and add it to the solution if it has a non-zero value
-			for(int i=0; i<routePatterns.length; i++){
-				routePatterns[i].value=values[i];
-				if(values[i]>=config.PRECISION){
-					solution.add(routePatterns[i]);
-					//System.out.println(routePatterns[i]);
-				}
-			}
-			
-		} catch (IloException e) {
-			e.printStackTrace();
-		}
-		masterData.currentSolution = solution;
-		return super.hasNewCuts();
-	}
-
 
 	
 }

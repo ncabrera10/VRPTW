@@ -33,7 +33,11 @@ public class GraphManager {
 	 * Bounds matrix
 	 */
 	public static double[][] boundsMatrix;
-	public static int timeIndex;			// Last index for the bounds matrix
+	
+	/**
+	 * Last index for the bounds matrix
+	 */
+	public static int timeIndex;
 	
 	/**
 	 * Best cost found for each node at each iteration of the bounding stage
@@ -62,37 +66,49 @@ public class GraphManager {
 		nodes = new Node[numNodes];
 		visited = new int[numNodes];
 		visitedMT = new int[numNodes][DataHandler.numThreads+1];
-		boundsMatrix= new double [numNodes][(int) Math.ceil((double)DataHandler.tw_b[0]/DataHandler.boundStep)+1];
+		boundsMatrix = new double [numNodes][(int) Math.ceil((double)DataHandler.tw_b[0]/DataHandler.boundStep)+1];
 
-		bestCost= new double [numNodes];
+		bestCost = new double [numNodes];
 		for(int i=1; i<numNodes; i++){
-			bestCost[i]=Double.POSITIVE_INFINITY;
+			bestCost[i] = Double.POSITIVE_INFINITY;
 		}
 		
-		PrimalBound= 0;
-		overallBestCost=0;
+		PrimalBound = 0;
+		overallBestCost = 0;
 		finalNode = new FinalNode(numNodes, 0, 0, 0, DataHandler.tw_b[0]);
 		
 	}
 
-	// This method adds a vertex to the graph
+	/**
+	 * This method adds a vertex to the graph
+	 * @param v
+	 * @return
+	 */
 	public boolean addVertex(Node v) {
 		nodes[v.getID()] = v;
 		return true;
 	}
 	
-	// This method returns the array of nodes
+	/**
+	 * This method returns the array of nodes
+	 * @return
+	 */
 	public Node[] getNodes(){
 		return nodes;
 	}
 	
-	//This method finds the best arc regarding the cost/time ratio
+	/**
+	 * This method finds the best arc regarding the cost/time ratio
+	 */
 	public static void  calNaiveDualBound() {
+		
+		// If we still haven't added any cuts:
+		
 		if(VRPTW.numInequalities == 0) {
 
 			GraphManager.naiveDualBound=Double.POSITIVE_INFINITY;
 			for (int i = 0; i < DataHandler.numArcs; i++) {
-				if(DataHandler.timeList[i]!=0 && DataHandler.costList[i]/DataHandler.timeList[i]<=GraphManager.naiveDualBound ){
+				if(DataHandler.timeList[i]!=0 && DataHandler.costList[i]/DataHandler.timeList[i] <= GraphManager.naiveDualBound ){
 					GraphManager.naiveDualBound=DataHandler.costList[i]/DataHandler.timeList[i];
 					}
 			}

@@ -30,13 +30,34 @@ import ilog.cplex.IloCplex;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
 
+/**
+ * Integer heuristic: When the root node is solved, it tries to generate an integer solution
+ * with the current pool of columns
+ * 
+ * @author nicolas.cabrera-malik
+ *
+ */
 public class IntegerHeuristic implements BAPListener {
 
+	/**
+	 * Logger to print key info
+	 */
 	 protected final Logger logger = LoggerFactory.getLogger(IntegerHeuristic.class);
 
+	 /**
+	  * Branch and price object
+	  */
 	 private final BranchAndPrice bap;
+	 
+	 /**
+	  * Indicates if the heuristic was successful
+	  */
 	 private int sizePoolIntegerEvaluation = 0;
 	 
+	 /**
+	  * Creates an integer heuristic object
+	  * @param bap
+	  */
 	public IntegerHeuristic(BranchAndPrice bap) {
 		this.bap = bap;
 	}
@@ -115,14 +136,12 @@ public class IntegerHeuristic implements BAPListener {
 	
 	@Override
 	public void branchCreated(BranchEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override
 	public void finishBAP(FinishEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	 public void finishedColumnGenerationForNode(FinishProcessingNodeEvent finishProcessingNodeEvent) {
@@ -145,44 +164,37 @@ public class IntegerHeuristic implements BAPListener {
 
 	@Override
 	public void nodeIsFractional(NodeIsFractionalEvent arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void nodeIsInfeasible(NodeIsInfeasibleEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override
 	public void nodeIsInteger(NodeIsIntegerEvent arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void processNextNode(ProcessingNextNodeEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override
 	public void pruneNode(PruneNodeEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override
 	public void startBAP(StartEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	@Override
 	public void timeLimitExceeded(TimeLimitExceededEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	
 	}
 
 	public int getSizePoolIntegerEvaluation() {

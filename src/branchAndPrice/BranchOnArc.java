@@ -13,8 +13,8 @@ import org.jorlib.frameworks.columnGeneration.branchAndPrice.BAPNode;
 import columnGeneration.VRPTW;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
+import pricingAlgorithms.PA_PricingProblem;
 import columnGeneration.RoutePattern;
-import pulseAlgorithm.PA_PricingProblem;
 
 /**
  * This class implements the branching on an arc decisions

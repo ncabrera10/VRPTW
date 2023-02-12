@@ -10,7 +10,7 @@ import org.jorlib.frameworks.columnGeneration.util.OrderedBiMap;
 import ilog.concert.IloNumVar;
 import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
-import pulseAlgorithm.PA_PricingProblem;
+import pricingAlgorithms.PA_PricingProblem;
 
 /**
  * Data container for the master problem.

@@ -39,8 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import columnGeneration.VRPTW;
+import pricingAlgorithms.PA_PricingProblem;
 import columnGeneration.RoutePattern;
-import pulseAlgorithm.PA_PricingProblem;
 
 import java.util.LinkedHashMap;
 //import java.util.List;

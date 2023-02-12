@@ -5,14 +5,16 @@ import java.util.Hashtable;
 
 import parameters.CGParameters;
 import parameters.GlobalParameters;
-import pulseAlgorithm.PulseHandler;
+import pricingAlgorithms.PulseHandler;
 
 
-/** This class represents the final node. It holds the pulse method override for the final node.
 
-
-*/
-
+/**
+ * This class represents the final node. It holds the pulse method override for the final node.
+ * Whenever the final node is reached, the method pulseBound or pulseMT are used.
+ * @author nicolas.cabrera-malik
+ *
+ */
 public class FinalNode extends Node {
 
 	/**
@@ -72,8 +74,19 @@ public class FinalNode extends Node {
 		
 	// The current pool of paths found 
 	
+	/**
+	 * Distance of the paths found
+	 */
 	public Hashtable<String, Double> routesPoolDist;
+	
+	/**
+	 * Reduced cost of the paths found
+	 */
 	public Hashtable<String, Double> routesPoolRC;
+	
+	/**
+	 * List that contains the paths in string format
+	 */
 	public ArrayList<String> pool;
 	
 	/** Class constructor

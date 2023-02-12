@@ -32,8 +32,8 @@ import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
-import pulseAlgorithm.PA_PricingProblem;
-import pulseAlgorithm.PA_Solver;
+import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PA_Solver;
 
 /**
  * Simple solver class which solves the VRPTW Problem through Branch-price-and-cut.

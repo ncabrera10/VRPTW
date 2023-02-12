@@ -8,8 +8,8 @@ import org.jorlib.frameworks.columnGeneration.master.cutGeneration.AbstractInequ
 
 import columnGeneration.VRPTW;
 import dataStructures.DataHandler;
+import pricingAlgorithms.PA_PricingProblem;
 import columnGeneration.RoutePattern;
-import pulseAlgorithm.PA_PricingProblem;
 
 
 /**

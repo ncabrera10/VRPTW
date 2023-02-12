@@ -10,9 +10,10 @@ import java.util.StringTokenizer;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
 
-
 /**
- * This class manages relevant information from the current instance
+ * This class will store the main information of the current instance
+ * 
+ * @author nicolas.cabrera-malik
  *
  */
 public class DataHandler {
@@ -25,7 +26,7 @@ public class DataHandler {
 	public static int numArcs;
 	
 	/**
-	 * Number of nodes
+	 * Number of nodes (Customers + depot)
 	 */
 	public static int n;
 	
@@ -120,11 +121,6 @@ public class DataHandler {
 	 */
 	private GraphManager G;
 	
-	// Input file information
-	public static String  instanceType;
-	public static int instanceNumber;
-	public static String CvsInput;
-	
 	/**
 	 * Number of threads
 	 */
@@ -139,11 +135,25 @@ public class DataHandler {
 	 * Step size for the bounding procedure
 	 */
 	public static int boundStep;
+
+	
+	// Input file information
 	
 	/**
-	 * Dual variables
+	 * Instance type: R, C, RC
 	 */
-	public static double[] pi;
+	public static String  instanceType;
+	
+	/**
+	 * Instance identifier
+	 */
+	public static int instanceNumber;
+	
+	/**
+	 * Instance txt file name
+	 */
+	public static String CvsInput;
+	
 	
 	/**
 	 * Creates a data handler
@@ -152,11 +162,18 @@ public class DataHandler {
 	 */
 	public DataHandler(String dataFile, String type, int instanceID, int number, int step) {
 
+		// Initializes the seed for the random number generator of java:
+		
 		DataHandler.rnd = new Random(GlobalParameters.SEED);
+		
+		// Initializes info about the instance:
 		
 		CvsInput = dataFile;
 		instanceType = type;
-		instanceNumber=instanceID;
+		instanceNumber = instanceID;
+		
+		// Key information for the pulse: # of threads and the size of the step for the bounding procedure:
+		
 		numThreads = CGParameters.PULSE_NUM_THREADS;
 		boundStep = step;
 

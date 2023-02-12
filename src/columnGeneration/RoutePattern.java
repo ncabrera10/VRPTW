@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.jorlib.frameworks.columnGeneration.colgenMain.AbstractColumn;
 
-import pulseAlgorithm.PA_PricingProblem;
+import pricingAlgorithms.PA_PricingProblem;
 
 /**
  * Implementation of a column in the VRPTW.

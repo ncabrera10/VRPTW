@@ -1,4 +1,4 @@
-package pulseAlgorithm;
+package pricingAlgorithms;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,8 @@ import dataStructures.GraphManager;
 import columnGeneration.RoutePattern;
 
 /**
- * This class provides a solver for the PLRP pricing problem.
- * The pricing problem is an Elementary shortest path with resource constraints, replenishment and park-and-loop
+ * This class provides a solver for the pricing problem.
+ * The pricing problem is an Elementary shortest path with resource constraints
  * 
  */
 
@@ -88,7 +88,7 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 			//3. If solved to optimality.
 			
 			if(PulseHandler.isWasSolvedToOptimality()) {
-				this.pricingProblemInfeasible=false;
+				this.pricingProblemInfeasible = false;
 				PA_Solver.solvedToOptimality = true;
 				PA_Solver.objectiveFunction = PulseHandler.getPrimalBound();	
 				this.objective = PulseHandler.getPrimalBound();	
@@ -99,8 +99,8 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 			//If the number of paths was zero, the problem was indeed infeasible!
 			
 			if(newPatterns.size() == 0) {
-				pricingProblemInfeasible=true;
-				this.objective=Double.MAX_VALUE;
+				pricingProblemInfeasible = true;
+				this.objective = Double.MAX_VALUE;
 			}
 		}
 		catch(Exception e) {
@@ -112,11 +112,17 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 		return newPatterns;
 	}
 	
+	/**
+	 * This method iterates overall the paths found by the pulse and creates the corresponding route patterns
+	 * @return list of route patterns
+	 */
 	public List<RoutePattern> createListOfElementaryPatterns(){
+		
+		// Initialize the list of patterns:
 		
 		List<RoutePattern> newPatterns=new ArrayList<>();
 		
-		//4. Adds all the paths:
+		// Iterates over the pool of paths found by the pulse:
 		
 		for(int i=0;i<GraphManager.finalNode.pool.size();i++) {
 			
@@ -127,6 +133,8 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 				pattern[j] = 0;
 			}
 			
+			// Recovers the list of nodes visited:
+			
 			String col = GraphManager.finalNode.pool.get(i);
 			
 			//Capture the cost and the reduced cost:
@@ -134,8 +142,7 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 			double cost = GraphManager.finalNode.routesPoolDist.get(col);
 			double rco = GraphManager.finalNode.routesPoolRC.get(col);
 			
-			//Put a 1 in the vector if the customer is there.
-			
+			//Put a 1 in the vector if the customer is there:
 			
 			col = col.substring(1,col.length()-1);
 			String[] colSplit = col.split(", ");
@@ -148,15 +155,17 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 			}
 			dummyPath.add(0);
 			
-			//Creates the pattern
+			// Creates the pattern:
 				
 			RoutePattern column=new RoutePattern("NewPatternPulse", false, pattern,cost,dummyPath,pricingProblem,rco);
 				
-			//Adds the pattern to the list
+			// Adds the pattern to the list:
 				
 			newPatterns.add(column);
 			
 		}
+		
+		// Returns the list of patterns:
 		
 		return newPatterns;
 	}
@@ -175,6 +184,10 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 		
 	}
 
+	/**
+	 * This method updates the graph, to account for the branching decisions.
+	 * Forbidden arcs are marked using a matrix.
+	 */
 	@Override
 	public void branchingDecisionPerformed(@SuppressWarnings("rawtypes") BranchingDecision bd) {
 		
@@ -200,6 +213,9 @@ public final class PA_Solver extends AbstractPricingProblemSolver<VRPTW, RoutePa
 		}
 	}
 
+	/**
+	 * This method unmarks arcs, when branching decisions are reversed:
+	 */
 	@Override
 	public void branchingDecisionReversed(@SuppressWarnings("rawtypes") BranchingDecision bd) {
 		if(bd instanceof FixArc) {

@@ -1,13 +1,11 @@
-package pulseAlgorithm;
+package pricingAlgorithms;
 
 import org.jorlib.frameworks.columnGeneration.pricing.AbstractPricingProblem;
 
 import columnGeneration.VRPTW;
 
 /**
- * Definition of the pricing problem. Since there's only 1 pricing problem in the PLRP
- * we can simply extend the pricing problem included in the framework with no further modifications.
- * 
+ * Definition of the pricing problem. 
  */
 
 public final class PA_PricingProblem extends AbstractPricingProblem<VRPTW> {
