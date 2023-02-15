@@ -37,6 +37,11 @@ public final class VRPTW implements ModelInterface{
 	public static int numInequalities;
 	
 	/**
+	 * Number of cuts added
+	 */
+	public static int numCutsAdded;
+	
+	/**
 	 * Number of BAP nodes explored
 	 */
 	

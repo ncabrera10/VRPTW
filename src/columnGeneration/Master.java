@@ -146,7 +146,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			route.add(0);
 			route.add(j);
 			route.add(0);
-			RoutePattern column=new RoutePattern("Artificial", true, pattern,cost*10,route,pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
+			RoutePattern column=new RoutePattern("Artificial", false, pattern,cost*10,route,pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
 			paths.add(column);
 			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
 			pathN++;
@@ -197,7 +197,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 			route.add(0);
 			route.add(j);
 			route.add(0);
-			RoutePattern column=new RoutePattern("Artificial", true, pattern,cost*10,route,pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
+			RoutePattern column=new RoutePattern("Artificial", false, pattern,cost*10,route,pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
 			paths.add(column);
 			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
 			pathN++;

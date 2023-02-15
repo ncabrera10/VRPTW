@@ -183,7 +183,7 @@ public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,VRP
 				//System.out.println("I added: "+inequality.id+" - "+inequality.cutSet.toString());
 				inequalities.add(inequality);
 				numCuts++;
-				VRPTW.numInequalities++;
+				VRPTW.numCutsAdded++;
 				
 				for(int j = 0;j<3;j++) {
 					num_times[inequality.cutSet.get(j)-1]++;
