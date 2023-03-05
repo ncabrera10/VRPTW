@@ -12,7 +12,7 @@
 
 This code contains all the source code for executing a branch-price-and-cut algorithm for the Vehicle Routing Problem with Time Windows.
 
-The pricing problem is solved by the Pulse Algorithm. To speed-up the algorithm, the pulse is solved heuristically in the first CG iterations by 
+The pricing problem is solved by either the Pulse Algorithm, a labeling algorithm or a tabu search. To speed-up the algorithm, the pulse is solved heuristically in the first CG iterations by 
 setting a limit on the number of paths that can be generated at a given iteration.
 
 We also show how the subset row inequalities can be handled by the pulse algorithm. 
