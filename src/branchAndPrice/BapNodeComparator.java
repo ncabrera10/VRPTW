@@ -14,7 +14,5 @@ import columnGeneration.RoutePattern;
 public class BapNodeComparator implements Comparator<BAPNode<VRPTW, RoutePattern>>{
 	public int compare(BAPNode<VRPTW, RoutePattern> o1, BAPNode<VRPTW, RoutePattern> o2) {
 		return Integer.compare(o1.nodeID, o2.nodeID); //BFS
-		//return -Integer.compare(o1.nodeID, o2.nodeID); //DFS
-       
     }
 }

@@ -24,8 +24,8 @@ import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
-import pricingAlgorithms.PA_PricingProblem;
-import pricingAlgorithms.PA_Solver;
+import pricingAlgorithms.PricingProblem;
+import pricingAlgorithms.PricingProblem_Solver;
 
 /**
  * Simple solver class which solves the VRPTW Problem through Column Generation.
@@ -73,8 +73,8 @@ public final class VRPTWSolver {
 				
 		//Create the pricing problem
 	
-		PA_PricingProblem pricingProblem = new PA_PricingProblem(dataModel, "PA");
-		List<PA_PricingProblem> pricingProblems = new ArrayList<>();
+		PricingProblem pricingProblem = new PricingProblem(dataModel, "PA");
+		List<PricingProblem> pricingProblems = new ArrayList<>();
 		pricingProblems.add(pricingProblem);
 		
 		//Create the master problem
@@ -85,7 +85,7 @@ public final class VRPTWSolver {
 		
 		//Define which solvers to use
 		
-		List<Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PA_PricingProblem>>> solvers= Collections.singletonList(PA_Solver.class);
+		List<Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PricingProblem>>> solvers= Collections.singletonList(PricingProblem_Solver.class);
 
 		//Define an upper bound (stronger is better). In this case we simply sum the demands, i.e. cut each final from its own raw (Rather poor initial solution).
 		
@@ -101,7 +101,7 @@ public final class VRPTWSolver {
 				
 		//Create a column generation instance
 		
-		ColGen<VRPTW, RoutePattern, PA_PricingProblem> cg = new ColumnGenerationDirector(dataModel, master, pricingProblem, solvers, initSolution, upperBound, lowerBound,pricingProblems);
+		ColGen<VRPTW, RoutePattern, PricingProblem> cg = new ColumnGenerationDirector(dataModel, master, pricingProblem, solvers, initSolution, upperBound, lowerBound,pricingProblems);
 		
 		/**
 		 * The ColGen class manages the entire procedure by invoking the MP and PP iteratively. 
@@ -227,8 +227,11 @@ public final class VRPTWSolver {
 	@SuppressWarnings("deprecation")
 	public void printFinalIntegerSolution(List<RoutePattern> columns) throws IloException {
 		
-		//1. Solve the master problem with the final pool of columns, imposing the integrality conditions.
+		// Store the final time:
 		
+		VRPTW.FTime = (double) System.nanoTime();
+		
+		//1. Solve the master problem with the final pool of columns, imposing the integrality conditions.
 		
 		//1.1 Create an empty model:
 		

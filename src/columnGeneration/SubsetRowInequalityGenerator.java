@@ -97,11 +97,9 @@ public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,VRP
 							}
 							
 							total_value += Math.floor(coeff* 0.5)* route.value ;
-							//System.out.println(route.value+" - "+coeff+" - "+(Math.ceil(coeff* 0.5)* route.value)+" - "+total_value);
-        				}
+						}
         				
         			}
-        			//System.out.println(i+" - "+j+" - "+k+" :"+total_value);
         			
         			//We check if the violation satisfies the threshold:
         			
@@ -146,8 +144,6 @@ public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,VRP
         							routes_ids.add(route.id);
     							}
     							
-            				//}
-            				
             			}
         				
         				//Create the subset row inequality constraint:
@@ -170,7 +166,7 @@ public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,VRP
 		for(int i = 0;i<provisional_inequalities.size() && numCuts<CGParameters.MAX_SUBSET_ROW_INEQ_PERITER;i++) {
 			
 			SubsetRowInequality inequality = provisional_inequalities.get(i);
-			//System.out.println(inequality);
+			
 			boolean can_be_added = true;
 			for(int j = 0;j<3;j++) {
 				if(num_times[inequality.cutSet.get(j)-1] >= CGParameters.MAX_SUBSET_ROW_INEQ_PERCUSTOMER) {
@@ -180,14 +176,12 @@ public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,VRP
 			
 			if(can_be_added && !masterData.subsetRowInequalities.containsKey(inequality)){
 				this.addCut(inequality);
-				//System.out.println("I added: "+inequality.id+" - "+inequality.cutSet.toString());
 				inequalities.add(inequality);
 				numCuts++;
 				VRPTW.numCutsAdded++;
 				
 				for(int j = 0;j<3;j++) {
 					num_times[inequality.cutSet.get(j)-1]++;
-					//System.out.println("Node: "+GraphManager.nodes[inequality.cutSet.get(j)].id);
 					GraphManager.nodes[inequality.cutSet.get(j)].getSubsetRow_ids().add(inequality.id);
 				}
 			}

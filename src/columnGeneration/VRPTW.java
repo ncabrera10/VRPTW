@@ -64,6 +64,11 @@ public final class VRPTW implements ModelInterface{
 	public static Double ITime = (double) System.nanoTime();
 	
 	/**
+	 * Final time for the BAP
+	 */
+	public static Double FTime;
+	
+	/**
 	 * Number of column generation iterations
 	 */
 	public static int cgIteration;
@@ -98,6 +103,44 @@ public final class VRPTW implements ModelInterface{
 	 */
 	public static int[][] isForbidden = new int[DataHandler.n+1][DataHandler.n+1]; //Takes a value of 0 for allowed arcs 
 	
+	// Other important metrics:
+	
+	/**
+	 * Number of times the pricing problem was solved by the pulse:
+	 */
+	
+	public static int number_pricing_byPulse;
+	
+	/**
+	 * Number of times the pricing problem was solved by the tabu search:
+	 */
+	
+	public static int number_pricing_byTabu;
+	
+	/**
+	 * Number of times the pricing problem was solved to optimality:
+	 */
+	public static int number_pricing_solvedToOptimality;
+	
+	/**
+	 * Computational time spend on the master problem
+	 */
+	
+	public static double time_on_master;
+	
+	/**
+	 * Computational time spend on the pricing problem
+	 */
+	
+	public static double time_on_pricing;
+	
+	/**
+	 * Computational time used for solving the root node
+	 */
+	
+	public static double time_on_root_node;
+	
+	public static double lb_on_root_node;
 	
 	@Override
 	public String getName() {

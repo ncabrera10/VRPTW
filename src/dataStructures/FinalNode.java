@@ -5,7 +5,7 @@ import java.util.Hashtable;
 
 import parameters.CGParameters;
 import parameters.GlobalParameters;
-import pricingAlgorithms.PulseHandler;
+import pricingAlgorithms.PricingProblem_Handler;
 
 
 
@@ -85,6 +85,16 @@ public class FinalNode extends Node {
 	public Hashtable<String, Double> routesPoolRC;
 	
 	/**
+	 * Time of the paths found
+	 */
+	public Hashtable<String, Double> routesPoolTime;
+	
+	/**
+	 * Load of the paths found
+	 */
+	public Hashtable<String, Double> routesPoolLoad;
+	
+	/**
 	 * List that contains the paths in string format
 	 */
 	public ArrayList<String> pool;
@@ -108,7 +118,8 @@ public class FinalNode extends Node {
 		pool = new ArrayList<String>();
 		routesPoolDist = new Hashtable<String, Double>();
 		routesPoolRC  = new Hashtable<String, Double>();
-		
+		routesPoolTime = new Hashtable<String, Double>();
+		routesPoolLoad = new Hashtable<String, Double>();
 	}
 	
 	/**
@@ -118,6 +129,8 @@ public class FinalNode extends Node {
 		pool = new ArrayList<String>();
 		routesPoolDist = new Hashtable<String, Double>();
 		routesPoolRC  = new Hashtable<String, Double>();
+		routesPoolTime = new Hashtable<String, Double>();
+		routesPoolLoad = new Hashtable<String, Double>();
 	}
 	
 	
@@ -167,17 +180,18 @@ public class FinalNode extends Node {
 					this.Path.add(id);
 					
 					if(PCost < 0) {
-						
 						String keyS = this.Path.toString();
 						if(!routesPoolRC.containsKey(keyS)) {
 							routesPoolRC.put(keyS,PCost);
 							routesPoolDist.put(keyS,PDist);
+							routesPoolTime.put(keyS,PTime);
+							routesPoolLoad.put(keyS,PLoad);
 							pool.add(keyS);
-							PulseHandler.setPruneHarder(0);
-							PulseHandler.setPrimalBound(PCost);
-							PulseHandler.setNumPaths(PulseHandler.getNumPaths()+1);
-							if(PulseHandler.getNumPaths() > CGParameters.MAX_PATHS_PER_ITERATION) {
-								PulseHandler.setStop(true);
+							PricingProblem_Handler.setPruneHarder(0);
+							PricingProblem_Handler.setPrimalBound(PCost);
+							PricingProblem_Handler.setNumPaths(PricingProblem_Handler.getNumPaths()+1);
+							if(PricingProblem_Handler.getNumPaths() > CGParameters.MAX_PATHS_PER_ITERATION) {
+								PricingProblem_Handler.setStop(true);
 							}
 						}
 						
@@ -192,6 +206,103 @@ public class FinalNode extends Node {
 			}
 
 		}
+	
+	@Override
+	public void expandLabelExact(Nglabel L) {
+		
+		//We check if this path has a lower reduced cost than the primal bound:
+		
+		if(L.getReducedCost() < PricingProblem_Handler.getPrimalBound()-Math.pow(10,-GlobalParameters.PRECISION)) {
+			
+			PricingProblem_Handler.setPrimalBound(L.getReducedCost());
+			
+			//We check if the path has a negative reduced cost under the original dual variables:
+			
+			if(L.getReducedCost() < 0) {
+				
+				this.recoverPath(L);
+				
+			}
+		}
+		
+	}
+
+	@Override
+	public void expandLabelHeuristic(Nglabel L) {
+		
+		//We check if this path has a lower reduced cost than the primal bound:
+		
+		if(L.getReducedCost() < PricingProblem_Handler.getPrimalBound()-Math.pow(10,-GlobalParameters.PRECISION)) {
+			
+			PricingProblem_Handler.setPrimalBound(L.getReducedCost());
+			
+			//We check if the path has a negative reduced cost under the original dual variables:
+			
+			if(L.getReducedCost() < 0) {
+				
+				this.recoverPath(L);
+				
+			}
+		}
+	}
+	
+	/**
+	 * This method adds a path to the list of paths with negative reduced cost
+	 * @param L
+	 */
+	public void recoverPath(Nglabel L) {
+	
+		int numBacks = 0;
+		boolean continuar = true;
+		Nglabel cambiable = L;
+
+		ArrayList<Integer> path = new ArrayList<Integer>();
+		while(continuar && numBacks <= 1000) {
+			
+			int predLabelID = cambiable.getPredecessor();
+			boolean encontrado = false;
+			for(int i=0;i<cambiable.getPredecessorNode().getNGlabelsList().size() && !encontrado;i++) {
+				Nglabel Lp = cambiable.getPredecessorNode().getNGlabelsList().get(i);
+				if(Lp.getId() == predLabelID) {
+					path.add(Lp.getNode().id);
+					encontrado = true;
+					cambiable = Lp;
+					if(Lp.getPredecessor() == -1) {
+						continuar = false;
+					}
+				}
+				
+			}
+			numBacks++;
+	
+		}
+
+		// Build the path (Reverse it):
+		
+		this.Path.clear();
+		
+		this.Path.add(id);
+		
+		for(int i=path.size()-1;i>=0;i--) {
+			this.Path.add(path.get(i));
+		}
+		this.Path.add(id);
+
+		String keyS = this.Path.toString();
+		if(!routesPoolRC.containsKey(keyS)) {
+		
+			routesPoolRC.put(keyS,L.getReducedCost());
+			routesPoolDist.put(keyS,L.getCost());
+			routesPoolTime.put(keyS,L.getTotalTime());
+			routesPoolLoad.put(keyS,L.getLoad());
+			pool.add(keyS);
+			PricingProblem_Handler.setPruneHarder(0);
+			PricingProblem_Handler.setPrimalBound(L.getReducedCost());
+			PricingProblem_Handler.setNumPaths(PricingProblem_Handler.getNumPaths()+1);
+		}
+	
+	}
+	
 	
 	/**
 	 * Id of the node

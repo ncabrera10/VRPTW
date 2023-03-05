@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import columnGeneration.Master;
 import columnGeneration.RoutePattern;
+import columnGeneration.VRPTW;
 import dataStructures.DataHandler;
 import ilog.concert.IloColumn;
 import ilog.concert.IloException;
@@ -70,7 +71,6 @@ public class IntegerHeuristic implements BAPListener {
 		 	try (IloCplex cplex = new IloCplex()) {
 				cplex.setOut(null); //Disable cplex output
 				
-				//cplex.setParam(IloCplex.IntParam.Threads, config.MAXTHREADS); //Set number of threads that may be used by the cplex
 				cplex.setParam(IloCplex.IntParam.Threads, GlobalParameters.THREADS); //Set number of threads that may be used by the cplex
 				
 				//Define the objective
@@ -145,7 +145,10 @@ public class IntegerHeuristic implements BAPListener {
 	}
 
 	 public void finishedColumnGenerationForNode(FinishProcessingNodeEvent finishProcessingNodeEvent) {
-	       
+		 	if(finishProcessingNodeEvent.node.nodeID == 0) {
+		 		VRPTW.time_on_root_node =  (System.nanoTime()-VRPTW.ITime)/1000000000;
+		 	}
+		 
 		 	// If sufficient number of new columns generated
 	        if(finishProcessingNodeEvent.node.nodeID == 0 || bap.getTotalGeneratedColumns() - Master.getPaths().size() >= 50)
 	        {

@@ -7,7 +7,7 @@ import org.jorlib.frameworks.columnGeneration.branchAndPrice.branchingDecisions.
 import org.jorlib.frameworks.columnGeneration.master.cutGeneration.AbstractInequality;
 
 import columnGeneration.VRPTW;
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 import columnGeneration.RoutePattern;
 
 /**
@@ -24,7 +24,7 @@ public final class RemoveArc implements BranchingDecision<VRPTW,RoutePattern>{
 	/**
 	 * Pricing problem
 	 */
-	public final PA_PricingProblem pricingProblem;
+	public final PricingProblem pricingProblem;
 	
 	/**
 	 * List of inequalities we currently have
@@ -65,7 +65,7 @@ public final class RemoveArc implements BranchingDecision<VRPTW,RoutePattern>{
 	 * @param pricingProblem
 	 * @param arc
 	 */
-	public RemoveArc(PA_PricingProblem pricingProblem,String arc,List<AbstractInequality> list) {
+	public RemoveArc(PricingProblem pricingProblem,String arc,List<AbstractInequality> list) {
 		
 		//Initializes the hashtables:
 		

@@ -21,7 +21,7 @@ import columnGeneration.Master;
 import columnGeneration.VRPTW;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 import columnGeneration.RoutePattern;
 
 /**
@@ -32,7 +32,7 @@ import columnGeneration.RoutePattern;
  * @author nicolas.cabrera-malik
  *
  */
-public final class BranchAndPrice extends AbstractBranchAndPrice<VRPTW,RoutePattern,PA_PricingProblem> {
+public final class BranchAndPrice extends AbstractBranchAndPrice<VRPTW,RoutePattern,PricingProblem> {
 
 	/**
 	 * This method creates a branch and price object and initializes the procedure
@@ -44,9 +44,9 @@ public final class BranchAndPrice extends AbstractBranchAndPrice<VRPTW,RoutePatt
 	 * @param objectiveInitialSolution
 	 * @param initialSolution
 	 */
-	public BranchAndPrice(VRPTW modelData, Master master,List<PA_PricingProblem> pricingProblems,
-			List<Class<? extends AbstractPricingProblemSolver<VRPTW,RoutePattern,PA_PricingProblem>>>solvers,
-			List<? extends AbstractBranchCreator<VRPTW,RoutePattern,PA_PricingProblem>> branchCreators,
+	public BranchAndPrice(VRPTW modelData, Master master,List<PricingProblem> pricingProblems,
+			List<Class<? extends AbstractPricingProblemSolver<VRPTW,RoutePattern,PricingProblem>>>solvers,
+			List<? extends AbstractBranchCreator<VRPTW,RoutePattern,PricingProblem>> branchCreators,
 			double objectiveInitialSolution,
 			List<RoutePattern> initialSolution) {
 			super(modelData,master,pricingProblems,solvers,branchCreators,0,objectiveInitialSolution);
@@ -127,7 +127,7 @@ public final class BranchAndPrice extends AbstractBranchAndPrice<VRPTW,RoutePatt
 	 */
 	@Override
 	protected void solveBAPNode(BAPNode<VRPTW, RoutePattern> bapNode, long timeLimit) throws TimeLimitExceededException {
-		ColGen<VRPTW, RoutePattern, PA_PricingProblem> cg = null;
+		ColGen<VRPTW, RoutePattern, PricingProblem> cg = null;
 		try {
 			// Initializes the stabilized column generation object:
 			

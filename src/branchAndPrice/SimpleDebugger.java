@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import columnGeneration.VRPTW;
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 import columnGeneration.RoutePattern;
 
 import java.util.LinkedHashMap;
@@ -61,9 +61,9 @@ public class SimpleDebugger implements BAPListener, CGListener, CHListener{
     protected final Logger logger = LoggerFactory.getLogger(SimpleDebugger.class);
 
     /** Branch-and-Price instance being debugged **/
-    protected final AbstractBranchAndPrice<VRPTW,RoutePattern,PA_PricingProblem> bap;
+    protected final AbstractBranchAndPrice<VRPTW,RoutePattern,PricingProblem> bap;
     /** Column Generation instance being debugged **/
-    protected final ColGen<VRPTW, RoutePattern, PA_PricingProblem> colGen;
+    protected final ColGen<VRPTW, RoutePattern, PricingProblem> colGen;
     /** CutHandler instance being debugged **/
     protected final CutHandler<?, ?> cutHandler;
 
@@ -76,7 +76,7 @@ public class SimpleDebugger implements BAPListener, CGListener, CHListener{
      * Creates a debugger for Column Generation instances
      * @param colGen Column generation instance to which the debugger should be attached
      */
-    public SimpleDebugger(ColGen<VRPTW, RoutePattern, PA_PricingProblem> colGen){
+    public SimpleDebugger(ColGen<VRPTW, RoutePattern, PricingProblem> colGen){
        this(colGen, null);
     }
 
@@ -85,7 +85,7 @@ public class SimpleDebugger implements BAPListener, CGListener, CHListener{
      * @param colGen Column generation instance to which the debugger should be attached
      * @param cutHandler Cut Handler instance to which the debugger should be attached
      */
-    public SimpleDebugger(ColGen<VRPTW, RoutePattern, PA_PricingProblem> colGen, CutHandler<?, ?> cutHandler){
+    public SimpleDebugger(ColGen<VRPTW, RoutePattern, PricingProblem> colGen, CutHandler<?, ?> cutHandler){
         this.bap=null;
         this.colGen=colGen;
         this.cutHandler=cutHandler;
@@ -100,7 +100,7 @@ public class SimpleDebugger implements BAPListener, CGListener, CHListener{
      * @param captureColumnGenerationEventsBAP boolean indicating whether Column Generation events should be captured which are being
      *                                      generated when BAPNodes are being processed.
      */
-    public SimpleDebugger(AbstractBranchAndPrice<VRPTW, RoutePattern, PA_PricingProblem> bap, boolean captureColumnGenerationEventsBAP){
+    public SimpleDebugger(AbstractBranchAndPrice<VRPTW, RoutePattern, PricingProblem> bap, boolean captureColumnGenerationEventsBAP){
         this(bap, null, captureColumnGenerationEventsBAP);
     }
 
@@ -111,7 +111,7 @@ public class SimpleDebugger implements BAPListener, CGListener, CHListener{
      * @param captureColumnGenerationEventsBAP boolean indicating whether Column Generation events should be captured which are being
      *                                      generated when BAPNodes are being processed.
      */
-    public SimpleDebugger(AbstractBranchAndPrice<VRPTW, RoutePattern, PA_PricingProblem> bap, CutHandler<?, ?> cutHandler, boolean captureColumnGenerationEventsBAP){
+    public SimpleDebugger(AbstractBranchAndPrice<VRPTW, RoutePattern, PricingProblem> bap, CutHandler<?, ?> cutHandler, boolean captureColumnGenerationEventsBAP){
         this.bap=bap;
         this.colGen=null;
         this.cutHandler=cutHandler;

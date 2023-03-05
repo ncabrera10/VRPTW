@@ -13,7 +13,7 @@ import org.jorlib.frameworks.columnGeneration.branchAndPrice.BAPNode;
 import columnGeneration.VRPTW;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 import columnGeneration.RoutePattern;
 
 /**
@@ -25,12 +25,12 @@ import columnGeneration.RoutePattern;
  * @author nicolas.cabrera-malik
  *
  */
-public final class BranchOnArc extends  AbstractBranchCreator<VRPTW,RoutePattern,PA_PricingProblem>{
+public final class BranchOnArc extends  AbstractBranchCreator<VRPTW,RoutePattern,PricingProblem>{
 
 	/**
 	 * The pricing problem
 	 */
-	private PA_PricingProblem pricingProblem=null;
+	private PricingProblem pricingProblem=null;
 	
 	/**
 	 * Selected arc for branching
@@ -42,7 +42,7 @@ public final class BranchOnArc extends  AbstractBranchCreator<VRPTW,RoutePattern
 	 * @param modelData
 	 * @param pricingProblems
 	 */
-	public BranchOnArc(VRPTW modelData, List<PA_PricingProblem> pricingProblems) {
+	public BranchOnArc(VRPTW modelData, List<PricingProblem> pricingProblems) {
 		
 		super(modelData,pricingProblems);
 	}
@@ -102,7 +102,7 @@ public final class BranchOnArc extends  AbstractBranchCreator<VRPTW,RoutePattern
 		        
 		        while (itr.hasNext()) {
 		        	 
-		            String key = itr.next(); //!key.contains(""+(PLRP.numCustomers+1)) && 
+		            String key = itr.next();
 		            if(arc_values.get(key) < 1-Math.pow(10,-GlobalParameters.PRECISION)) {
 		            	candidates_d.put(key, arc_values.get(key));
 		            	numFracArcs++;

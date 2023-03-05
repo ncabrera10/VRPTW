@@ -1,15 +1,18 @@
 package dataStructures;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import columnGeneration.Master;
 import columnGeneration.VRPTW;
 import parameters.CGParameters;
-import pricingAlgorithms.PulseHandler;
+import pricingAlgorithms.PricingProblem_Handler;
 
 
 /**
  * This class represents a node. It holds the pulse method and all the logic of the algorithm.
+ * It also contains the methods used for the labeling algorithm.
 
  * @author nicolas.cabrera-malik
  *
@@ -57,7 +60,23 @@ public class Node implements Cloneable{
 	
 	private ArrayList<Integer> subsetRow_ids;
 	
+	// Additional variables for the tabu search:
+	
+	public double arrivalTime;//Arrival time to the node in the solution
+	public double exitTime; //max(arrivalTime, tw_a)+ service
+	public int route;//Route in which the node is visited
+	public int visited;//Position in the route
 
+	public double cumulativeDist;
+	public double cumulativeCost;
+	public int tw_w;//time window width
+
+	// Additional variables for the labeling algorithm:
+	
+	public ArrayList<Nglabel> NGlabelsList;
+	
+	public Set<Integer> ngNeighborhood;
+	
 	/** Class constructor
 	 * @param i Node number
 	 * @param d Node demand
@@ -73,6 +92,11 @@ public class Node implements Cloneable{
 		tw_b = b;	
 		magicIndex = new ArrayList<>();
 		subsetRow_ids = new ArrayList<Integer>();
+		
+		//Labeling
+		
+		NGlabelsList = new ArrayList<Nglabel>();
+		ngNeighborhood = new HashSet<>();
 	}
 	
 	/**
@@ -129,9 +153,9 @@ public class Node implements Cloneable{
 						// Update cuts info
 						
 						for(Integer id_cut:GraphManager.nodes[arcHead].subsetRow_ids) {
-							if(PulseHandler.getNumVecesSubsetRowIneq().containsKey(id_cut)) {
-								PulseHandler.getNumVecesSubsetRowIneq().put(id_cut,PulseHandler.getNumVecesSubsetRowIneq().get(id_cut)+1);
-								if(PulseHandler.getNumVecesSubsetRowIneq().get(id_cut) == 2) {
+							if(PricingProblem_Handler.getNumVecesSubsetRowIneq().containsKey(id_cut)) {
+								PricingProblem_Handler.getNumVecesSubsetRowIneq().put(id_cut,PricingProblem_Handler.getNumVecesSubsetRowIneq().get(id_cut)+1);
+								if(PricingProblem_Handler.getNumVecesSubsetRowIneq().get(id_cut) == 2) {
 									newPCost = newPCost - Master.getDuals_subset().get(id_cut);
 								}
 							}
@@ -144,8 +168,8 @@ public class Node implements Cloneable{
 						// Update cuts info 
 						
 						for(Integer id_cut:GraphManager.nodes[arcHead].subsetRow_ids) {
-							if(PulseHandler.getNumVecesSubsetRowIneq().containsKey(id_cut)) {
-								PulseHandler.getNumVecesSubsetRowIneq().put(id_cut,PulseHandler.getNumVecesSubsetRowIneq().get(id_cut)-1);
+							if(PricingProblem_Handler.getNumVecesSubsetRowIneq().containsKey(id_cut)) {
+								PricingProblem_Handler.getNumVecesSubsetRowIneq().put(id_cut,PricingProblem_Handler.getNumVecesSubsetRowIneq().get(id_cut)-1);
 							}
 						}
 					}
@@ -176,8 +200,8 @@ public class Node implements Cloneable{
 	
 			// Check if we can stop the pulse heuristically:
 		
-			if(PulseHandler.getPruneHarder() == 0 && (System.nanoTime()-PulseHandler.getITime())/1000000000 > CGParameters.TIME_LIMIT_PULSE_SEC){
-				PulseHandler.setStop(true);
+			if(PricingProblem_Handler.getPruneHarder() == 0 && (System.nanoTime()-PricingProblem_Handler.getITime())/1000000000 > CGParameters.TIME_LIMIT_PULSE_SEC){
+				PricingProblem_Handler.setStop(true);
 			}
 				
 			// If the node is visited for the first time, sort the outgoing arcs array 
@@ -191,7 +215,7 @@ public class Node implements Cloneable{
 				PTime=this.tw_a;
 			}
 			// Try to prune pulses with the pruning strategies //Aca se podria hacer un ngpaths..TODO
-			if(!PulseHandler.isStop() && (GraphManager.visitedMT[id][thread]==0 && (PCost+CalcBoundPhaseII(PTime))<GraphManager.PrimalBound && !rollback(path,PCost,PTime))){
+			if(!PricingProblem_Handler.isStop() && (GraphManager.visitedMT[id][thread]==0 && (PCost+CalcBoundPhaseII(PTime))<GraphManager.PrimalBound && !rollback(path,PCost,PTime))){
 				// If the pulse is not pruned add it to the path
 				GraphManager.visitedMT[id][thread]=1;
 				path.add(id);	
@@ -215,10 +239,10 @@ public class Node implements Cloneable{
 						// Update cuts info
 						
 						for(Integer id_cut:GraphManager.nodes[Head].subsetRow_ids) {
-							if(PulseHandler.getNumVecesSubsetRowIneqMT().containsKey(id_cut+"-"+thread)) {
-								PulseHandler.getNumVecesSubsetRowIneqMT().put(id_cut+"-"+thread,PulseHandler.getNumVecesSubsetRowIneqMT().get(id_cut+"-"+thread)+1);
+							if(PricingProblem_Handler.getNumVecesSubsetRowIneqMT().containsKey(id_cut+"-"+thread)) {
+								PricingProblem_Handler.getNumVecesSubsetRowIneqMT().put(id_cut+"-"+thread,PricingProblem_Handler.getNumVecesSubsetRowIneqMT().get(id_cut+"-"+thread)+1);
 	
-								if(PulseHandler.getNumVecesSubsetRowIneqMT().get(id_cut+"-"+thread) == 2) {
+								if(PricingProblem_Handler.getNumVecesSubsetRowIneqMT().get(id_cut+"-"+thread) == 2) {
 									NewPCost = NewPCost - Master.getDuals_subset().get(id_cut);
 								}
 							}
@@ -262,9 +286,9 @@ public class Node implements Cloneable{
 						// Update cuts info
 						
 						for(Integer id_cut:GraphManager.nodes[Head].subsetRow_ids) {
-							if(PulseHandler.getNumVecesSubsetRowIneqMT().containsKey(id_cut+"-"+thread)) {
+							if(PricingProblem_Handler.getNumVecesSubsetRowIneqMT().containsKey(id_cut+"-"+thread)) {
 								
-								PulseHandler.getNumVecesSubsetRowIneqMT().put(id_cut+"-"+thread,PulseHandler.getNumVecesSubsetRowIneqMT().get(id_cut+"-"+thread)-1);
+								PricingProblem_Handler.getNumVecesSubsetRowIneqMT().put(id_cut+"-"+thread,PricingProblem_Handler.getNumVecesSubsetRowIneqMT().get(id_cut+"-"+thread)-1);
 							}
 						}
 					}
@@ -283,6 +307,181 @@ public class Node implements Cloneable{
 		}
 	}
 
+	
+	// Labeling algorithm:
+	
+	/**
+	 * This method expands a label with exact dominance
+	 * @param L
+	 */
+	public void expandLabelExact(Nglabel L) {
+		
+		// Check if the current label is not dominated by other labels in this node.
+		
+			if(!checkDominanceExact(L)) {
+				
+				// If the node is visited for the first time, sort the outgoing arcs array 
+				
+				if(this.firstTime==true){
+					this.firstTime=false;
+					this.Sort(this.magicIndex);
+				}
+							
+			// Try to prune pulses with the pruning strategies: cycles, feasibility, bounds, and rollback
+							
+				if(L.getTotalTime() <= this.tw_b
+					&& (L.getReducedCost()+CalcBoundPhaseII(L.getTotalTime()))<GraphManager.PrimalBound
+					) {
+					
+					// Evaluate all the outgoing driving arcs:
+					
+					for(int i=0; i<magicIndex.size(); i++) {
+						
+						// Head node information
+						
+							int Head = DataHandler.arcs[magicIndex.get(i)][1];
+							Node head = GraphManager.nodes[Head];
+							
+						// Check if we can create a new label in the head node:
+							
+							//Is not an unreachable customer
+							//Is not a forbidden customer due to NG paths constraints
+						
+							if(VRPTW.isForbidden[id][Head] == 0 && L.getUnreachableCustomers()[Head] == 0 && L.getNgForbiddenCustomers()[Head] == 0) {
+								
+								double newRedCost = L.getReducedCost() + DataHandler.costList[magicIndex.get(i)];
+								double newCost = L.getCost() + DataHandler.distList[magicIndex.get(i)];
+								double newTotalTime = L.getTotalTime() + DataHandler.timeList[magicIndex.get(i)];
+								double newLoad = L.getLoad() + DataHandler.loadList[magicIndex.get(i)];
+
+								// Check for feasibility:
+								
+								if(newTotalTime <= head.tw_b
+										&& newLoad <= DataHandler.Q
+										&& newTotalTime <= GraphManager.finalNode.tw_b
+										) {
+												
+											int newPredecessor = L.getId();
+											
+											if(Head == 0 && newRedCost < 0) {
+												Nglabel nLabel = new Nglabel(newRedCost,newCost,newTotalTime,newLoad,newPredecessor,head,PricingProblem_Handler.getLabelCounter(),this,L.getNumberOfNodes()+1,L.getNumTimesSubsetRowIneq());
+												nLabel.markUnreachableNodes(L);
+												
+												GraphManager.finalNode.expandLabelExact(nLabel);
+												PricingProblem_Handler.setLabelCounter(PricingProblem_Handler.getLabelCounter()+1);
+												
+											}else if(Head != 0){
+												// If the node is reached before the lower time window wait until the beginning of the time window
+												
+												if(newTotalTime < head.tw_a) {
+													newTotalTime = head.tw_a;
+												}
+												Nglabel nLabel = new Nglabel(newRedCost,newCost,newTotalTime,newLoad,newPredecessor,head,PricingProblem_Handler.getLabelCounter(),this,L.getNumberOfNodes()+1,L.getNumTimesSubsetRowIneq());
+												nLabel.markUnreachableNodes(L);
+												
+												
+												if(!head.checkDominanceExact(nLabel)) {
+													PricingProblem_Handler.addLabel_DOrder_NG(nLabel, PricingProblem_Handler.getLabelsQueue_NG());
+													PricingProblem_Handler.addLabel_DOrder_NG(nLabel, head.getNGlabelsList());
+													PricingProblem_Handler.setLabelCounter(PricingProblem_Handler.getLabelCounter()+1);
+												}
+											}
+										
+												
+										}
+							}
+					}
+					
+				}
+			
+						
+			}
+	}
+	
+	public void expandLabelHeuristic(Nglabel L) {
+		
+		// Check if the current label is not dominated by other labels in this node.
+		
+		if(!checkDominanceHeuristic(L)) {
+			
+			// If the node is visited for the first time, sort the outgoing arcs array 
+			
+			if(this.firstTime==true){
+				this.firstTime=false;
+				this.Sort(this.magicIndex);
+			}
+						
+		// Try to prune pulses with the pruning strategies: cycles, feasibility, bounds, and rollback
+						
+			if(L.getTotalTime() <= this.tw_b
+				&& (L.getReducedCost()+CalcBoundPhaseII(L.getTotalTime()))<GraphManager.PrimalBound
+				) {
+				
+				// Evaluate all the outgoing driving arcs:
+				
+				for(int i=0; i<magicIndex.size(); i++) {
+					
+					// Head node information
+					
+						int Head = DataHandler.arcs[magicIndex.get(i)][1];
+						Node head = GraphManager.nodes[Head];
+						
+					// Check if we can create a new label in the head node:
+						
+						//Is not an unreachable customer
+						//Is not a forbidden customer due to NG paths constraints
+					
+						if(VRPTW.isForbidden[id][Head] == 0 && L.getUnreachableCustomers()[Head] == 0 && L.getNgForbiddenCustomers()[Head] == 0) {
+							
+							double newRedCost = L.getReducedCost() + DataHandler.costList[magicIndex.get(i)];
+							double newCost = L.getCost() + DataHandler.distList[magicIndex.get(i)];
+							double newTotalTime = L.getTotalTime() + DataHandler.timeList[magicIndex.get(i)];
+							double newLoad = L.getLoad() + DataHandler.loadList[magicIndex.get(i)];
+
+							// Check for feasibility:
+							
+							if(newTotalTime <= head.tw_b
+									&& newLoad <= DataHandler.Q
+									&& newTotalTime <= GraphManager.finalNode.tw_b
+									) {
+								
+										int newPredecessor = L.getId();
+
+										if(Head == 0 && newRedCost < 0) {
+											
+											Nglabel nLabel = new Nglabel(newRedCost,newCost,newTotalTime,newLoad,newPredecessor,head,PricingProblem_Handler.getLabelCounter(),this,L.getNumberOfNodes()+1,L.getNumTimesSubsetRowIneq());
+											nLabel.markUnreachableNodes(L);
+											GraphManager.finalNode.expandLabelHeuristic(nLabel);
+											PricingProblem_Handler.setLabelCounter(PricingProblem_Handler.getLabelCounter()+1);
+											
+										}else if(Head != 0){
+											// If the node is reached before the lower time window wait until the beginning of the time window
+											
+											if(newTotalTime < head.tw_a) {
+												newTotalTime = head.tw_a;
+											}
+											// Create the label:
+											Nglabel nLabel = new Nglabel(newRedCost,newCost,newTotalTime,newLoad,newPredecessor,head,PricingProblem_Handler.getLabelCounter(),this,L.getNumberOfNodes()+1,L.getNumTimesSubsetRowIneq());
+											nLabel.markUnreachableNodes(L);
+											if(!head.checkDominanceHeuristic(nLabel)) {
+												PricingProblem_Handler.addLabel_DOrder_NG(nLabel, PricingProblem_Handler.getLabelsQueue_NG());
+												PricingProblem_Handler.addLabel_DOrder_NG(nLabel, head.getNGlabelsList());
+												PricingProblem_Handler.setLabelCounter(PricingProblem_Handler.getLabelCounter()+1);
+											}
+										}
+									
+											
+									}
+						}
+				}
+				
+			}
+		
+					
+		}
+						
+	}
+	
 
 	/** Rollback pruning strategy
 	 * @param path current partial path
@@ -375,7 +574,8 @@ public class Node implements Cloneable{
 	 */
 	public String toString(){
 		
-		return id+"";
+		return ""+id;
+		
 	}
 	
 	
@@ -458,30 +658,30 @@ public class Node implements Cloneable{
 		
 		public void addAVisitSubSetRow() {
 			for(Integer id:this.subsetRow_ids) {
-				if(PulseHandler.getNumVecesSubsetRowIneq().containsKey(id)) {
-					PulseHandler.getNumVecesSubsetRowIneq().put(id,PulseHandler.getNumVecesSubsetRowIneq().get(id)+1);
+				if(PricingProblem_Handler.getNumVecesSubsetRowIneq().containsKey(id)) {
+					PricingProblem_Handler.getNumVecesSubsetRowIneq().put(id,PricingProblem_Handler.getNumVecesSubsetRowIneq().get(id)+1);
 				}
 			}
 		}
 		public void minusAVisitSubSetRow() {
 			for(Integer id:this.subsetRow_ids) {
-				if(PulseHandler.getNumVecesSubsetRowIneq().containsKey(id)) {
-					PulseHandler.getNumVecesSubsetRowIneq().put(id,PulseHandler.getNumVecesSubsetRowIneq().get(id)-1);
+				if(PricingProblem_Handler.getNumVecesSubsetRowIneq().containsKey(id)) {
+					PricingProblem_Handler.getNumVecesSubsetRowIneq().put(id,PricingProblem_Handler.getNumVecesSubsetRowIneq().get(id)-1);
 				}
 			}
 		}
 		
 		public void addAVisitSubSetRow(int Thread) {
 			for(Integer id:this.subsetRow_ids) {
-				if(PulseHandler.getNumVecesSubsetRowIneqMT().containsKey(id+"-"+Thread)) {
-					PulseHandler.getNumVecesSubsetRowIneqMT().put(id+"-"+Thread,PulseHandler.getNumVecesSubsetRowIneqMT().get(id+"-"+Thread)+1);
+				if(PricingProblem_Handler.getNumVecesSubsetRowIneqMT().containsKey(id+"-"+Thread)) {
+					PricingProblem_Handler.getNumVecesSubsetRowIneqMT().put(id+"-"+Thread,PricingProblem_Handler.getNumVecesSubsetRowIneqMT().get(id+"-"+Thread)+1);
 				}
 			}
 		}
 		public void minusAVisitSubSetRow(int Thread) {
 			for(Integer id:this.subsetRow_ids) {
-				if(PulseHandler.getNumVecesSubsetRowIneqMT().containsKey(id+"-"+Thread)) {
-					PulseHandler.getNumVecesSubsetRowIneqMT().put(id+"-"+Thread,PulseHandler.getNumVecesSubsetRowIneqMT().get(id+"-"+Thread)-1);
+				if(PricingProblem_Handler.getNumVecesSubsetRowIneqMT().containsKey(id+"-"+Thread)) {
+					PricingProblem_Handler.getNumVecesSubsetRowIneqMT().put(id+"-"+Thread,PricingProblem_Handler.getNumVecesSubsetRowIneqMT().get(id+"-"+Thread)-1);
 				}
 			}
 		}
@@ -492,5 +692,128 @@ public class Node implements Cloneable{
 			} catch (CloneNotSupportedException e) {
 				return null;
 			}
+		}
+		
+		/**
+		 * This method checks if the current label is dominated by any of the labels we have in this node
+		 * @param L
+		 * @return
+		 */
+		public boolean checkDominanceExact(Nglabel L) {
+			
+			if(id == 0) {
+				return(false);
+			}
+			//We check if any of the labels we have dominates the label L
+			int rIndex;
+			Nglabel Lp;
+			boolean dominated = false;
+			for(int i = NGlabelsList.size()-1;i>=0;i--) {
+				Lp = NGlabelsList.get(i);
+				if (L.getId() != Lp.getId()) {
+					if(Lp.exactlyDominatesLabel(L)) {
+						dominated = true;
+					}else if(L.exactlyDominatesLabel(Lp) && PricingProblem_Handler.getLabelsQueue_NG().size()>0){
+						if(Lp.isNotTreated()) {
+							rIndex = PricingProblem_Handler.binarySearch_NG(Lp, PricingProblem_Handler.getLabelsQueue_NG());
+							if(rIndex == -1) {
+								boolean encontrado = false;
+								for(int j = 0;j < PricingProblem_Handler.getLabelsQueue_NG().size() && !encontrado;j++) {
+									Nglabel lab = PricingProblem_Handler.getLabelsQueue_NG().get(j);
+									if(lab.getId() == Lp.getId()) {
+										rIndex = j;
+										encontrado = true;
+									}
+								}
+							}
+							PricingProblem_Handler.getLabelsQueue_NG().remove(rIndex);
+						}
+						NGlabelsList.remove(i);
+					}
+				}
+			}
+		
+			
+			return(dominated);
+		}
+		
+		/**
+		 * This method checks if the current label is dominated by any of the labels we have in this node
+		 * @param L
+		 * @return
+		 */
+		public boolean checkDominanceHeuristic(Nglabel L) {
+
+			if(id == 0) {
+				return(false);
+			}
+		
+			//We check if any of the labels we have dominates the label L
+			int rIndex;
+			Nglabel Lp;
+			boolean dominated = false;
+			for(int i = NGlabelsList.size()-1;i>=0;i--) {
+				Lp = NGlabelsList.get(i);
+				if (L.getId() != Lp.getId()) {
+					if(Lp.heuristicallyDominatesLabel(L)) {
+						
+						dominated = true;
+						
+					}else if(L.heuristicallyDominatesLabel(Lp) && PricingProblem_Handler.getLabelsQueue_NG().size()>0){
+						if(Lp.isNotTreated()) {
+							rIndex = PricingProblem_Handler.binarySearch_NG(Lp, PricingProblem_Handler.getLabelsQueue_NG());
+							if(rIndex == -1) {
+								boolean encontrado = false;
+								for(int j = 0;j < PricingProblem_Handler.getLabelsQueue_NG().size() && !encontrado;j++) {
+									Nglabel lab = PricingProblem_Handler.getLabelsQueue_NG().get(j);
+									if(lab.getId() == Lp.getId()) {
+										rIndex = j;
+										encontrado = true;
+									}
+								}
+							}
+							PricingProblem_Handler.getLabelsQueue_NG().remove(rIndex);
+						}
+						NGlabelsList.remove(i);
+					}
+				}
+			}
+			
+				
+			return(dominated);
+		}
+		
+		
+		public void addNeighbor(int node){
+			ngNeighborhood.add(node);
+		}
+		
+		
+		/**
+		 * @return the ngNeighborhood
+		 */
+		public Set<Integer> getNgNeighborhood() {
+			return ngNeighborhood;
+		}
+
+		/**
+		 * @param ngNeighborhood the ngNeighborhood to set
+		 */
+		public void setNgNeighborhood(Set<Integer> ngNeighborhood) {
+			this.ngNeighborhood = ngNeighborhood;
+		}
+
+		/**
+		 * @return the nGlabelsList
+		 */
+		public ArrayList<Nglabel> getNGlabelsList() {
+			return NGlabelsList;
+		}
+
+		/**
+		 * @param nGlabelsList the nGlabelsList to set
+		 */
+		public void setNGlabelsList(ArrayList<Nglabel> nGlabelsList) {
+			NGlabelsList = nGlabelsList;
 		}
 }

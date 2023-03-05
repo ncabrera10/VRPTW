@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.jorlib.frameworks.columnGeneration.colgenMain.AbstractColumn;
 
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 
 /**
  * Implementation of a column in the VRPTW.
@@ -13,7 +13,7 @@ import pricingAlgorithms.PA_PricingProblem;
  * 
  */
 
-public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
+public final class RoutePattern extends AbstractColumn<VRPTW,PricingProblem>{
 
 	/** Abstract Column - This class defines a column in the CG process. **/
 	/** Defines a column. Each column has information regarding if a client is visited or not **/
@@ -28,6 +28,16 @@ public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
 	 * Total cost associated to this route
 	 */
 	public double cost;
+	
+	/**
+	 * Total time associated to this route
+	 */
+	public double time;
+	
+	/**
+	 * Total load associated to this route
+	 */
+	public double load;
 	
 	/**
 	 * Reduced cost (when the path was created)
@@ -65,12 +75,14 @@ public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
 	 * @param pricingProblem
 	 * @param redco
 	 */
-	public RoutePattern(String creator, boolean isArtificial, int[] pattern, double totalCost,ArrayList<Integer> r,PA_PricingProblem pricingProblem,double redco) {
+	public RoutePattern(String creator, boolean isArtificial, int[] pattern, double totalCost,ArrayList<Integer> r,PricingProblem pricingProblem,double redco,double tim,double loa) {
 		super(pricingProblem, isArtificial, creator);
 		this.yieldVector=pattern;
 		this.cost = totalCost;
 		this.route = r;
 		this.reducedCost = redco;
+		this.time = tim;
+		this.load = loa;
 		if(creator.equals("Artificial")) {
 			this.isArtif = true;
 		}else {
@@ -104,7 +116,7 @@ public final class RoutePattern extends AbstractColumn<VRPTW,PA_PricingProblem>{
 
 	@Override
 	public String toString() {
-		return id+" - "+"with value: "+ this.value+" Route pattern: "+Arrays.toString(yieldVector)+" actual route: "+route.toString()+" cost: "+this.cost+" reduced cost (When created): "+this.reducedCost+" creator: "+ this.creator;
+		return id+" - "+"with value: "+ this.value+" Route pattern: "+Arrays.toString(yieldVector)+" actual route: "+route.toString()+" cost: "+this.cost+" reduced cost (When created): "+this.reducedCost+" creator: "+ this.creator+" - time: "+time+" - load: "+load;
 	}
 
 	

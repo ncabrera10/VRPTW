@@ -32,8 +32,8 @@ import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
 import parameters.CGParameters;
 import parameters.GlobalParameters;
-import pricingAlgorithms.PA_PricingProblem;
-import pricingAlgorithms.PA_Solver;
+import pricingAlgorithms.PricingProblem;
+import pricingAlgorithms.PricingProblem_Solver;
 
 /**
  * Simple solver class which solves the VRPTW Problem through Branch-price-and-cut.
@@ -94,8 +94,8 @@ public final class VRPTWSolver {
 							
 		//Create the pricing problem
 	
-		PA_PricingProblem pricingProblem = new PA_PricingProblem(dataModel, "PA");
-		List<PA_PricingProblem> pricingProblems = new ArrayList<>();
+		PricingProblem pricingProblem = new PricingProblem(dataModel, "PA");
+		List<PricingProblem> pricingProblems = new ArrayList<>();
 		pricingProblems.add(pricingProblem);
 		
 		//Create the master problem
@@ -105,7 +105,7 @@ public final class VRPTWSolver {
 		
 		//Define which solvers to use
 		
-		List<Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PA_PricingProblem>>> solvers= Collections.singletonList(PA_Solver.class);
+		List<Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PricingProblem>>> solvers= Collections.singletonList(PricingProblem_Solver.class);
 
 		//Define an upper bound (stronger is better). In this case we simply sum the demands, i.e. cut each final from its own raw (Rather poor initial solution).
 		
@@ -116,11 +116,9 @@ public final class VRPTWSolver {
 		List<RoutePattern> initSolution=master.getInitialSolution(pricingProblem);
 		
 		//Lower bound on column generation solution (stronger is better): calculate least amount of finals needed to fulfil the order (ceil(\sum_j d_j*w_j /L)
-		
-		//double lowerBound=DataHandler.getFixCost()*OriginalGraph.getMinRoutes();
-			
+
 		//Define Branch creators
-		List<? extends AbstractBranchCreator<VRPTW,RoutePattern,PA_PricingProblem>> branchCreators= Collections.singletonList(new BranchOnArc(dataModel, pricingProblems));
+		List<? extends AbstractBranchCreator<VRPTW,RoutePattern,PricingProblem>> branchCreators= Collections.singletonList(new BranchOnArc(dataModel, pricingProblems));
 
 		
 		//Create a branch and price instance 
@@ -297,6 +295,10 @@ public final class VRPTWSolver {
 	 */
 	@SuppressWarnings("deprecation")
 	public void printFinalIntegerSolution(List<RoutePattern> columns) throws IloException {
+		
+		// Store the final time:
+		
+		VRPTW.FTime = (double) System.nanoTime();
 		
 		//1. Solve the master problem with the final pool of columns, imposing the integrality conditions.
 		

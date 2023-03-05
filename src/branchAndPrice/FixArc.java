@@ -8,7 +8,7 @@ import org.jorlib.frameworks.columnGeneration.master.cutGeneration.AbstractInequ
 
 import columnGeneration.VRPTW;
 import dataStructures.DataHandler;
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 import columnGeneration.RoutePattern;
 
 
@@ -23,7 +23,7 @@ public final class FixArc implements BranchingDecision<VRPTW,RoutePattern>{
 	/**
 	 * Pricing problem
 	 */
-	public final PA_PricingProblem pricingProblem;
+	public final PricingProblem pricingProblem;
 	
 	/**
 	 * List of inequalities we currently have
@@ -62,7 +62,7 @@ public final class FixArc implements BranchingDecision<VRPTW,RoutePattern>{
 	 * @param pricingProblem
 	 * @param arc
 	 */
-	public FixArc(PA_PricingProblem pricingProblem,String arc,List<AbstractInequality> list) {
+	public FixArc(PricingProblem pricingProblem,String arc,List<AbstractInequality> list) {
 		
 		//Initialize the lists of arcs and the main parameters:
 		

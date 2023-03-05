@@ -39,7 +39,7 @@ public class DataHandler {
 	 * Capacity limit for each vehicle
 	 */
 	public static int Q;
-
+	
 	/**
 	 * All the arcs of the network stored in a vector where arcs[i][0] = tail of arc i and arcs[i][1] = head of arc i 
 	 */
@@ -265,8 +265,7 @@ public class DataHandler {
 		int arc = 0;
 		for (int i = 0; i <= n; i++) {
 			for (int j = 0; j <= n; j++) {
-				// Redondio a un decimal pero esta x10 para que quede entero
-				// para el SP
+
 				double d_ij = Math.sqrt(Math.pow((x[i] - x[j]), 2)	+ Math.pow((y[i] - y[j]), 2));
 				double dINT = Math.floor(d_ij*10)/10;
 				distance[i][j] = dINT;
@@ -275,8 +274,9 @@ public class DataHandler {
 				
 				cost[i][j] = dINT;
 				cost[j][i] = dINT;
-				// PODAR CON TW
+				// Try to prune using the TW information
 				if ((i==0 && (i!=j))  ||((i!=j) && tw_a[i] + service[i] + dINT <= tw_b[j]) ) {
+		
 					arcs_id[i][j] = arc;
 					distList[arc] = dINT;
 					costList[arc] = cost[i][j];
@@ -288,6 +288,8 @@ public class DataHandler {
 					G.getNodes()[i].magicIndex.add(a1);
 					
 					arc++;
+				}else {
+					arcs_id[i][j] = -1;
 				}
 			}
 		}
@@ -300,7 +302,6 @@ public class DataHandler {
 		bufRdr.close();
 		
 		
-	
 	}
 
 	/**

@@ -8,17 +8,17 @@ import org.jorlib.frameworks.columnGeneration.master.OptimizationSense;
 import org.jorlib.frameworks.columnGeneration.pricing.AbstractPricingProblemSolver;
 
 import dataStructures.DataHandler;
-import pricingAlgorithms.PA_PricingProblem;
-import pricingAlgorithms.PA_Solver;
+import pricingAlgorithms.PricingProblem;
+import pricingAlgorithms.PricingProblem_Solver;
 
 /**
  * This method runs the column generation procedure.
  * @author nicolas.cabrera-malik
  *
  */
-public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, PA_PricingProblem> {
+public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, PricingProblem> {
 
-	public ColumnGenerationDirector(VRPTW dataModel, Master master,PA_PricingProblem pricingProblem, List<Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PA_PricingProblem>>> solvers, List<RoutePattern> initSolution, double cutoffValue,double boundOnMasterObjective, List<PA_PricingProblem> pricingProblems) {
+	public ColumnGenerationDirector(VRPTW dataModel, Master master,PricingProblem pricingProblem, List<Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PricingProblem>>> solvers, List<RoutePattern> initSolution, double cutoffValue,double boundOnMasterObjective, List<PricingProblem> pricingProblems) {
 		super(dataModel, master, pricingProblem, solvers, initSolution, cutoffValue, boundOnMasterObjective);
 	
 	}
@@ -27,9 +27,9 @@ public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, 
 	 * This method generates a lower bound on the objective function of the master problem
 	 */
 	@Override
-	protected double calculateBoundOnMasterObjective(Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PA_PricingProblem>> solver) {
-		if(PA_Solver.solvedToOptimality) {
-			return PA_Solver.objectiveFunction * DataHandler.n + objectiveMasterProblem ;//This bound was proposed by Parragh and Cordeau (2017)
+	protected double calculateBoundOnMasterObjective(Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PricingProblem>> solver) {
+		if(PricingProblem_Solver.solvedToOptimality) {
+			return PricingProblem_Solver.objectiveFunction * DataHandler.n + objectiveMasterProblem ;//This bound was proposed by Parragh and Cordeau (2017)
 		}else {
 			return 0.0;
 		}
@@ -79,7 +79,7 @@ public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, 
 		//Start the CG:
 		notifier.fireStartCGEvent();
 		do{
-			
+
 			// Update some global counters:
 			
 			nrOfColGenIterations++;
@@ -153,6 +153,9 @@ public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, 
 			
 		}while(foundNewColumns || hasNewCuts || continuar);
 		this.boundOnMasterObjective = (optimizationSenseMaster == OptimizationSense.MINIMIZE ? Math.max(this.boundOnMasterObjective, this.objectiveMasterProblem) : Math.min(this.boundOnMasterObjective, this.objectiveMasterProblem)); //When solved to optimality, the bound on the master problem objective equals the objective value.
+		if(VRPTW.stillAtTheRootNode) {
+			VRPTW.lb_on_root_node = this.boundOnMasterObjective;
+		}
 		colGenSolveTime=System.currentTimeMillis()-colGenSolveTime;
 		notifier.fireFinishCGEvent();
 		VRPTW.numBAPnodes++;
@@ -172,14 +175,14 @@ public final class ColumnGenerationDirector extends ColGen<VRPTW, RoutePattern, 
 		long time=System.currentTimeMillis();
 		
 		//Update data in pricing problems
-		for(PA_PricingProblem pricingProblem : pricingProblems){
+		for(PricingProblem pricingProblem : pricingProblems){
 			master.initializePricingProblem(pricingProblem);
 		}
 
 		//Solve pricing problems in the order of the pricing algorithms
 		notifier.fireStartPricingEvent();
 		pricingProblemManager.setTimeLimit(timeLimit);
-		for(Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PA_PricingProblem>> solver : solvers){
+		for(Class<? extends AbstractPricingProblemSolver<VRPTW, RoutePattern, PricingProblem>> solver : solvers){
 			newColumns=pricingProblemManager.solvePricingProblems(solver);
 
 			//Calculate a bound on the optimal solution of the master problem

@@ -21,8 +21,9 @@ import ilog.concert.IloNumVar;
 import ilog.concert.IloObjective;
 import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
+import metaheuristics.MetaheuristicHandler;
 import parameters.GlobalParameters;
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 
 /**
  * This is an implementation of the master problem. 
@@ -30,13 +31,24 @@ import pricingAlgorithms.PA_PricingProblem;
  * @author nicolas.cabrera-malik
  *
  */
-public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_PricingProblem, VRPTWMasterData> {
+public final class Master extends AbstractMaster<VRPTW, RoutePattern, PricingProblem, VRPTWMasterData> {
 
 	//Cplex objects:
 	
-	IloCplex cplex; //Cplex instance
-	private IloObjective obj; //Objective function
-	private IloRange[] satisfyDemandConstr; //Constraint
+	/**
+	 * Cplex instance
+	 */
+	IloCplex cplex;
+	
+	/**
+	 * Objective function
+	 */
+	private IloObjective obj;
+	
+	/**
+	 * Satisfy demand constraints
+	 */
+	private IloRange[] satisfyDemandConstr;
 	
 	/**
 	 * ArrayList to keep track of the method that created a certain column
@@ -55,17 +67,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	private static ArrayList<RoutePattern> paths;
 	
 	/**
-	 * ID's of the paths that are part of the current basis
-	 */
-	public static ArrayList<Integer>basisIndexes;
-	
-	/**
-	 * ID's of the paths that are NOT part of the current basis 
-	 */
-
-	public static ArrayList<Integer>ceroRCIndexes;
-	
-	/**
 	 * Array to store the dual variables: real values
 	 */
 	private static double[] duals;
@@ -81,14 +82,32 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	 */
 	private static int pathN;
 	
+	//For the tabu search:
+	
 	/**
-	 * Stores a chain of nodes for each path in the pool:
+	 * Boolean variable: is set to false once the tabu search is not able to find new promising paths
 	 */
+	public static boolean use_tabu = true;
 	
-	private static Hashtable<String,Integer> chainPaths;
+	/**
+	 * Stores a handler for the tabu search heuristic
+	 */
+	public static MetaheuristicHandler heuristics;
+		
+	/**
+	 * ID's of the paths that are part of the current basis
+	 */
+	public static ArrayList<Integer>basisIndexes;
 	
+	/**
+	 * ID's of the paths that are NOT part of the current basis 
+	 */
+
+	public static ArrayList<Integer>ceroRCIndexes;
+
+
 	/** Constructor: receives our data model and a reference to our pricing problem**/
-	public Master(VRPTW modelData, PA_PricingProblem pricingProblem, CutHandler<VRPTW,VRPTWMasterData> cutHandler) {
+	public Master(VRPTW modelData, PricingProblem pricingProblem, CutHandler<VRPTW,VRPTWMasterData> cutHandler) {
 		super(modelData, pricingProblem, cutHandler,OptimizationSense.MINIMIZE);
 	}
 
@@ -99,14 +118,16 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	 */
 	public void initializeMaster(int num) {
 		
-		chainPaths = new Hashtable<String,Integer>();
+		// Initializes main variables:
+		
 		N = num;
 		pathN = 0;
 		paths = new ArrayList<RoutePattern>();
 		basisIndexes = new ArrayList<Integer>();
 		ceroRCIndexes = new ArrayList<Integer>();
 		generator = new ArrayList<Integer>();
-
+		heuristics = new MetaheuristicHandler();
+		
 		//Initialize the dual variables values:
 		
 		duals = new double[N+1];
@@ -127,7 +148,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	 * @param pricingProblem pricing problem
 	 * @return Initial solution
 	 */
-	public List<RoutePattern> getInitialSolution(PA_PricingProblem pricingProblem){
+	public List<RoutePattern> getInitialSolution(PricingProblem pricingProblem){
 	
 		// Initialize the initial solution arraylist:
 		
@@ -135,37 +156,60 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 		
 		// We add artificial columns (To ensure feasibility of the RMP).
 		
-		for(int j = 1;j <= N;j++) {
-			int[] pattern=new int[N];
-			for(int i=0;i<N;i++) {
-				pattern[i] = 0;
+			// Iterate for every customer:
+		
+			for(int j = 1;j <= N;j++) {
+				
+				// Initialize the pattern:
+				
+					int[] pattern=new int[N];
+					for(int i=0;i<N;i++) {
+						pattern[i] = 0;
+					}
+					pattern[j-1] = 1;
+					
+				// Calculate the cost of the back-and-forth route:
+					
+					double cost = DataHandler.cost[0][j] + DataHandler.cost[j][0];
+					
+				// Creates the route:
+				
+					ArrayList<Integer>route = new ArrayList<Integer>();
+					route.add(0);
+					route.add(j);
+					route.add(0);
+					
+				// Creates the artificial pattern and adds it to the list of paths:
+					
+					RoutePattern column=new RoutePattern("Artificial", false, pattern,cost*10,route,pricingProblem,0,-1,-1); //We make them artificial so they stay forever.. in the BAP
+					paths.add(column);
+					initSolution.add(column);
+					generator.add(-1);
+				
+				// Updates the number of paths:
+					
+					pathN++;
+				
+				// Creates the same column but with the real cost
+				
+					column = new RoutePattern("Initialization", false, pattern,cost,route,pricingProblem,0,-1,-1); //These are not artificial.. in the BAP
+					paths.add(column);
+					initSolution.add(column);
+					generator.add(-1);
+					
+				// Updates the number of paths:
+					
+					pathN++;
+				
 			}
-			double cost = DataHandler.cost[0][j] + DataHandler.cost[j][0];
-			pattern[j-1] = 1;
-			ArrayList<Integer>route = new ArrayList<Integer>();
-			route.add(0);
-			route.add(j);
-			route.add(0);
-			RoutePattern column=new RoutePattern("Artificial", false, pattern,cost*10,route,pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
-			paths.add(column);
-			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
-			pathN++;
-			initSolution.add(column);
-			generator.add(-1);
-			
-			column = new RoutePattern("Initialization", false, pattern,cost,route,pricingProblem,0); //These are not artificial.. in the BAP
-			paths.add(column);
-			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
-			pathN++;
-			initSolution.add(column);
-			generator.add(-1);
-		}
 		
 		//Store the number of columns created on the initialization step
 		
-		VRPTW.numColumns_iniStep = VRPTW.numColumns;
+			VRPTW.numColumns_iniStep = VRPTW.numColumns;
 		
-		return initSolution;
+		// Returns the initial solution:
+			
+			return initSolution;
 	}
 	
 	/**
@@ -174,7 +218,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	 * @param pricingProblem pricing problem
 	 * @return Initial solution
 	 */
-	public List<RoutePattern> getInitialSolution_BAP(PA_PricingProblem pricingProblem){
+	public List<RoutePattern> getInitialSolution_BAP(PricingProblem pricingProblem){
 	
 		// Re-initializing the number of columns
 		
@@ -182,76 +226,108 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 		
 		// Initialize the initial solution arraylist:
 		
-		List<RoutePattern> initSolution=new ArrayList<>();
-		
-		// We add artificial columns (To ensure feasibility of the RMP).
-		
-		for(int j = 1;j <= N;j++) {
-			int[] pattern=new int[N];
-			for(int i=0;i<N;i++) {
-				pattern[i] = 0;
-			}
-			double cost = DataHandler.cost[0][j-1] + DataHandler.cost[j-1][0];
-			pattern[j-1] = 1;
-			ArrayList<Integer>route = new ArrayList<Integer>();
-			route.add(0);
-			route.add(j);
-			route.add(0);
-			RoutePattern column=new RoutePattern("Artificial", false, pattern,cost*10,route,pricingProblem,0); //We make them artificial so they stay forever.. in the BAP
-			paths.add(column);
-			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
-			pathN++;
-			initSolution.add(column);
-			generator.add(-1);
+			List<RoutePattern> initSolution=new ArrayList<>();
 			
-			column = new RoutePattern("Initialization", false, pattern,cost,route,pricingProblem,0); //These are not artificial.. in the BAP
-			paths.add(column);
-			chainPaths.put("("+0+"-"+j+");("+j+"-"+0+")", pathN);
-			pathN++;
-			initSolution.add(column);
-			generator.add(-1);
-		}
-		
-		//Store the number of columns created on the initialization step
-		
-			VRPTW.numColumns_iniStep = VRPTW.numColumns;
+			// We add artificial columns (To ensure feasibility of the RMP).
+			
+				// Iterate for every customer:
+			
+				for(int j = 1;j <= N;j++) {
+					
+					// Initialize the pattern:
+					
+						int[] pattern=new int[N];
+						for(int i=0;i<N;i++) {
+							pattern[i] = 0;
+						}
+						pattern[j-1] = 1;
+						
+					// Calculate the cost of the back-and-forth route:
+						
+						double cost = DataHandler.cost[0][j] + DataHandler.cost[j][0];
+						
+					// Creates the route:
+					
+						ArrayList<Integer>route = new ArrayList<Integer>();
+						route.add(0);
+						route.add(j);
+						route.add(0);
+						
+					// Creates the artificial pattern and adds it to the list of paths:
+						
+						RoutePattern column=new RoutePattern("Artificial", false, pattern,cost*10,route,pricingProblem,0,-1,-1); //We make them artificial so they stay forever.. in the BAP
+						paths.add(column);
+						initSolution.add(column);
+						generator.add(-1);
+					
+					// Updates the number of paths:
+						
+						pathN++;
+					
+					// Creates the same column but with the real cost
+					
+						column = new RoutePattern("Initialization", false, pattern,cost,route,pricingProblem,0,-1,-1); //These are not artificial.. in the BAP
+						paths.add(column);
+						initSolution.add(column);
+						generator.add(-1);
+						
+					// Updates the number of paths:
+						
+						pathN++;
+					
+				}
+			
+			//Store the number of columns created on the initialization step
+			
+				VRPTW.numColumns_iniStep = VRPTW.numColumns;
+			
+			// Returns the initial solution:
 				
-		// Returns the initial solution
-		
-		return initSolution;
+				return initSolution;
 	}
 	
 	/**
-	 * Build a the cplex problem. It builds the MP which is usually a linear program.
+	 * Build a the cplex problem. It builds the restricted master problem:
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
 	protected VRPTWMasterData buildModel() {
 		try {
-			cplex =new IloCplex(); //Create cplex instance
-			cplex.setOut(null); //Disable cplex output
-			cplex.setParam(IloCplex.IntParam.Threads, GlobalParameters.THREADS); //Set number of threads that may be used by the cplex
+			
+			// Creates the cplex instance:
+			
+				cplex =new IloCplex(); //Create cplex instance
+			
+			// Disables the output of cplex:
+				
+				cplex.setOut(null); //Disable cplex output
+			
+			// Sets the number of threads for CPLEX:
+				
+				cplex.setParam(IloCplex.IntParam.Threads, GlobalParameters.THREADS); //Set number of threads that may be used by the cplex
 			
 			//Define the objective
-			obj= cplex.addMinimize();
+			
+				obj= cplex.addMinimize();
 
 			//Define constraints (visit all customers exactly once)
 			
-			satisfyDemandConstr=new IloRange[DataHandler.n];
-			for(int i=0; i<DataHandler.n; i++)
-				satisfyDemandConstr[i]= cplex.addRange(1,Double.MAX_VALUE, "satisfyDemandFinal_"+(i+1));
+				satisfyDemandConstr=new IloRange[DataHandler.n];
+				for(int i=0; i<DataHandler.n; i++)
+					satisfyDemandConstr[i]= cplex.addRange(1,Double.MAX_VALUE, "satisfyDemandFinal_"+(i+1));
 
-			//Define a container for the variables
+			
 		} catch (IloException e) {
 			e.printStackTrace();
 		}
 
-		//Define a container for the variables
-		Map<PA_PricingProblem,OrderedBiMap<RoutePattern, IloNumVar>> varMap=new LinkedHashMap<>();
-		varMap.put(pricingProblems.get(0),new OrderedBiMap<>());
+		//Define a container for the variables:
+		
+			Map<PricingProblem,OrderedBiMap<RoutePattern, IloNumVar>> varMap=new LinkedHashMap<>();
+			varMap.put(pricingProblems.get(0),new OrderedBiMap<>());
 
-		//Return a new data object which will hold data from the Master Problem. Since we are not working with inequalities in this example,
-		//we can simply return the default.
+		//Return a new data object which will hold data from the Master Problem. 
+			
 		return new VRPTWMasterData(cplex,varMap);
 	}
 
@@ -262,13 +338,22 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	@Override
 	protected boolean solveMasterProblem(long timeLimit) throws TimeLimitExceededException {
 		try {
-			//Set time limit
+			// Set a time limit for solving the master problem:
+			
 			double timeRemaining=Math.max(1,(timeLimit-System.currentTimeMillis())/1000.0);
 			cplex.setParam(IloCplex.DoubleParam.TiLim, timeRemaining); //set time limit in seconds
-			//Potentially export the model
-			if(config.EXPORT_MODEL) cplex.exportModel(config.EXPORT_MASTER_DIR+"master_"+this.getIterationCount()+".lp");
-
-			//Solve the model
+			
+			
+			// Potentially export the model:
+			
+			if(config.EXPORT_MODEL) cplex.exportModel("./output/master_"+this.getIterationCount()+".lp");
+			
+			// Start the clock:
+			
+			double start_time = System.currentTimeMillis();
+			
+			// Solve the model:
+			
 			if(!cplex.solve() || cplex.getStatus()!=IloCplex.Status.Optimal){
 				if(cplex.getCplexStatus()==IloCplex.CplexStatus.AbortTimeLim) //Aborted due to time limit
 					throw new TimeLimitExceededException();
@@ -277,6 +362,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 					throw new RuntimeException("Master problem solve failed! Status: "+ cplex.getStatus());
 				}
 			}else{
+				VRPTW.time_on_master += (System.currentTimeMillis()-start_time)/1000;
 				masterData.objectiveValue= cplex.getObjValue();
 				
 				//Capture the basic and non-basic variables:
@@ -311,18 +397,24 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	 * The dual information required to solve the Pricing Porblem has to be passed.
 	 */
 	@Override
-	public void initializePricingProblem(PA_PricingProblem pricingProblem){
+	public void initializePricingProblem(PricingProblem pricingProblem){
 		try {
+			
+			// Recovers the dual variables:
 			
 			double[] duals_1 = cplex.getDuals(satisfyDemandConstr);
 
+			// Stores the dual variables:
+			
 			for(int i = 0;i < N; i++) {
 				
 				duals[i+1] = duals_1[i];
 				
 			}
 
-			pricingProblem.initPricingProblem(duals_1);//,dual_2);
+			// Initializes the pricing problem:
+			
+			pricingProblem.initPricingProblem(duals_1);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -334,20 +426,23 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	public void replaceActualDuals() {
 		try {
 			
-			double[] duals_1 = cplex.getDuals(satisfyDemandConstr);
+			// Recovers the dual variables:
+			
+				double[] duals_1 = cplex.getDuals(satisfyDemandConstr);
 
-			for(int i = 0;i < N; i++) {
+			// Stores the dual variables:
 				
-				duals[i+1] = duals_1[i];
-				
-			}
+				for(int i = 0;i < N; i++) {
+					
+					duals[i+1] = duals_1[i];
+				}
 			
 			//Subset row inequalities
 			
-			duals_subset = new Hashtable<Integer,Double>();
-			for(SubsetRowInequality subsetRowInequality:masterData.subsetRowInequalities.keySet()) {
-				duals_subset.put(subsetRowInequality.id,cplex.getDual(masterData.subsetRowInequalities.get(subsetRowInequality)));
-			}
+				duals_subset = new Hashtable<Integer,Double>();
+				for(SubsetRowInequality subsetRowInequality:masterData.subsetRowInequalities.keySet()) {
+					duals_subset.put(subsetRowInequality.id,cplex.getDual(masterData.subsetRowInequalities.get(subsetRowInequality)));
+				}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -365,40 +460,44 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	public void addColumn(RoutePattern column) {
 		try {
 
-			//Register column with objective
-			IloColumn iloColumn= cplex.column(obj,column.cost);
+			//Register column with objective:
+			
+				IloColumn iloColumn= cplex.column(obj,column.cost);
 
 			//Register column with demand constraint
-			for(int i=0; i<N; i++) {
-				iloColumn=iloColumn.and(cplex.column(satisfyDemandConstr[i], column.yieldVector[i]));
-			}
 				
+				for(int i=0; i<N; i++) {
+					iloColumn=iloColumn.and(cplex.column(satisfyDemandConstr[i], column.yieldVector[i]));
+				}
+					
 			//Account for the subset row inequalities:
-			for(SubsetRowInequality subsetRowInequality:masterData.subsetRowInequalities.keySet()) {
-				int cuenta = 0;
-				if(!subsetRowInequality.containsRoute(column.id)) {
-					for(int i:subsetRowInequality.cutSet) {
-						if(column.yieldVector[i-1] > 0) {
-							cuenta++;
+				
+				for(SubsetRowInequality subsetRowInequality:masterData.subsetRowInequalities.keySet()) {
+					int cuenta = 0;
+					if(!subsetRowInequality.containsRoute(column.id)) {
+						for(int i:subsetRowInequality.cutSet) {
+							if(column.yieldVector[i-1] > 0) {
+								cuenta++;
+							}
+						}
+						if(cuenta >= 2) {
+							subsetRowInequality.routes.add(column);
+							subsetRowInequality.coefficients.add(cuenta);
+							subsetRowInequality.routes_ids.add(column.id);
 						}
 					}
 					if(cuenta >= 2) {
-						subsetRowInequality.routes.add(column);
-						subsetRowInequality.coefficients.add(cuenta);
-						subsetRowInequality.routes_ids.add(column.id);
+						iloColumn = iloColumn.and(cplex.column(masterData.subsetRowInequalities.get(subsetRowInequality),1));
+						
 					}
 				}
-				if(cuenta >= 2) {
-					iloColumn = iloColumn.and(cplex.column(masterData.subsetRowInequalities.get(subsetRowInequality),1));
-					
-				}
-			}
 			
-			//Create the variable and store it
-			IloNumVar var= cplex.numVar(iloColumn, 0, 1, "z_"+","+column.id);
-			cplex.add(var);
-			masterData.addColumn(column, var);
-			paths.add(column);
+			//Create the variable and store it:
+				
+				IloNumVar var= cplex.numVar(iloColumn, 0, Double.MAX_VALUE, "z_"+","+column.id);
+				cplex.add(var);
+				masterData.addColumn(column, var);
+				paths.add(column);
 			
 		} catch (IloException e) {
 			e.printStackTrace();
@@ -555,17 +654,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PA_Pricing
 	public static void setPathN(int pathN) {
 		Master.pathN = pathN;
 	}
-
-	public static Hashtable<String, Integer> getChainPaths() {
-		return chainPaths;
-	}
-
-	public static void setChainPaths(Hashtable<String, Integer> chainPaths) {
-		Master.chainPaths = chainPaths;
-	}
-
-	
-	
 
 	/**
 	 * @return the duals_subset

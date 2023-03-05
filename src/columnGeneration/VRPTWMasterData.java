@@ -10,7 +10,7 @@ import org.jorlib.frameworks.columnGeneration.util.OrderedBiMap;
 import ilog.concert.IloNumVar;
 import ilog.concert.IloRange;
 import ilog.cplex.IloCplex;
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 
 /**
  * Data container for the master problem.
@@ -23,7 +23,7 @@ import pricingAlgorithms.PA_PricingProblem;
  */
 
 
-public final class VRPTWMasterData extends MasterData<VRPTW, RoutePattern, PA_PricingProblem, IloNumVar>{
+public final class VRPTWMasterData extends MasterData<VRPTW, RoutePattern, PricingProblem, IloNumVar>{
 
 	/** Mapping of the Subtour inequalities to constraints in the cplex model **/
 	public final Map<SubsetRowInequality, IloRange> subsetRowInequalities;
@@ -32,7 +32,7 @@ public final class VRPTWMasterData extends MasterData<VRPTW, RoutePattern, PA_Pr
 	
 	public ArrayList<RoutePattern> currentSolution;
 	
-	public VRPTWMasterData(IloCplex cplex,Map<PA_PricingProblem, OrderedBiMap<RoutePattern, IloNumVar>> varMap) {
+	public VRPTWMasterData(IloCplex cplex,Map<PricingProblem, OrderedBiMap<RoutePattern, IloNumVar>> varMap) {
 		super(varMap);
 		subsetRowInequalities=new LinkedHashMap<>();
 		this.cplex=cplex;

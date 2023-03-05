@@ -31,7 +31,7 @@ import org.jorlib.frameworks.columnGeneration.branchAndPrice.EventHandling.*;
 import org.jorlib.frameworks.columnGeneration.branchAndPrice.branchingDecisions.BranchingDecision;
 
 import columnGeneration.VRPTW;
-import pricingAlgorithms.PA_PricingProblem;
+import pricingAlgorithms.PricingProblem;
 import columnGeneration.RoutePattern;
 
 import java.io.BufferedWriter;
@@ -91,7 +91,7 @@ public class SimpleBAPLogger implements BAPListener{
      * @param branchAndPrice Branch-and-Price instance for which this logger is created.
      * @param outputFile file to redirect the output to.
      */
-    public SimpleBAPLogger(AbstractBranchAndPrice<VRPTW,RoutePattern,PA_PricingProblem> branchAndPrice, File outputFile){
+    public SimpleBAPLogger(AbstractBranchAndPrice<VRPTW,RoutePattern,PricingProblem> branchAndPrice, File outputFile){
         try {
             writer=new BufferedWriter(new FileWriter(outputFile));
         } catch (IOException e) {
