@@ -58,7 +58,7 @@ public class Main {
 		
 		// Number of nodes in the instance
 		
-		int numNodes = 25; //25; 50; 100;
+		int numNodes = 100; //25; 50; 100;
 		
 		// Select the implementation 
 			//Type 1:CG without cuts
