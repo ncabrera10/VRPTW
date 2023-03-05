@@ -22,6 +22,6 @@ The main class is called "Main". The user can run the code in the well known Sol
 
 ===========================================================================================================================================================================
 
-The parameters used by the BPC algorithm can be modified on the file "parametersCG.xml" inside the folder "config". For example, the user can modify the maximum number of pathsto be added at each iteration of any column generation iteration.
+The parameters used by the BPC algorithm can be modified on the file "parametersCG.xml" inside the folder "config". For example, the user can modify the maximum number of paths to be added at each iteration of any column generation iteration.
 
 The authors would really enjoy to know the (good) use of the pulse algorithm in different fields, so please send a line to nicolas.cabrera-malik@hec.ca or copa@uniandes.edu.co describing us your application (as brief as you want).
