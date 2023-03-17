@@ -180,6 +180,7 @@ public class PricingProblem_Handler {
 			
 			DataHandler.costList[i] = DataHandler.distList[i]-duals[DataHandler.arcs[i][0]]; //Calculate reduced cost with the dual variable of the tail node of each arc
 			DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] = DataHandler.costList[i];
+			DataHandler.sortList[i] = DataHandler.distList[i]-duals[DataHandler.arcs[i][0]]; //Use the dual variable of the tail node for sorting.
 			
 		}	
 		

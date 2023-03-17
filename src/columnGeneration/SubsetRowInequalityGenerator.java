@@ -221,7 +221,7 @@ public class SubsetRowInequalityGenerator extends AbstractCutGenerator<VRPTW,VRP
 				adicional += j + "_";
 			}
 			if(CGParameters.PRINT_IN_CONSOLE) {
-				System.out.println("Adding inequality: "+VRPTW.numInequalities+" with violation "+subsetRowInequality.violation+" with subset "+subsetRowInequality.cutSet.toString()+ " - "+expr);
+				System.out.println("Adding inequality: "+subsetRowInequality.id+" with violation "+subsetRowInequality.violation+" with subset "+subsetRowInequality.cutSet.toString()+ " - "+expr);
 			}
 			IloRange subsetRowConstraint = masterData.cplex.addLe(expr, 1, "subsetRowIneq_"+subsetRowInequality.id+"_"+adicional);
 			masterData.subsetRowInequalities.put(subsetRowInequality, subsetRowConstraint);

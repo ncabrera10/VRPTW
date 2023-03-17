@@ -79,7 +79,7 @@ public class IntegerHeuristic implements BAPListener {
 				//Define constraints (visit all customers exactly once)
 				IloRange[] satisfyDemandConstr=new IloRange[DataHandler.n];
 				for(int i=0; i< DataHandler.n; i++)
-					satisfyDemandConstr[i]= cplex.addRange(1,Double.MAX_VALUE, "satisfyDemandFinal_"+i);
+					satisfyDemandConstr[i]= cplex.addRange(1,1, "satisfyDemandFinal_"+i);
 
 
 				IloNumVar[] vars = new IloNumVar[columns.size()];

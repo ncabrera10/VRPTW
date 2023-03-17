@@ -46,7 +46,7 @@ public class Main {
 		
 		// Select the instance number: 101, 102..208
 		
-		int instanceNumber = 105;
+		int instanceNumber = 101;
 		
 		// Extension of the file
 		
@@ -64,7 +64,7 @@ public class Main {
 			//Type 1:CG without cuts
 			//Type 2:BPC
 		
-		int type = 2; 
+		int type = 1; 
 		
 		// Seed
 				

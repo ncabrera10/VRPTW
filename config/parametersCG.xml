@@ -3,7 +3,7 @@
 <properties>
 
 <entry key="PRINT_IN_CONSOLE">false</entry> 
-<entry key="MAX_PATHS_PER_ITERATION">50</entry>
+<entry key="MAX_PATHS_PER_ITERATION">400</entry>
 <entry key="BAP_TIME_LIMIT_SEC">3600</entry> 
 
 <entry key="TIME_LIMIT_PULSE_SEC">10</entry> 
@@ -12,14 +12,14 @@
 <entry key="BOUND_LOWER_TIME_PULSE">100</entry> 
 
 <entry key="USE_SUBSET_ROW_INEQ">true</entry> 
-<entry key="MAX_SUBSET_ROW_INEQ_PERITER">5</entry> 
+<entry key="MAX_SUBSET_ROW_INEQ_PERITER">30</entry> 
 <entry key="MIN_SUBSET_ROW_INEQ_VIOL">0.1</entry> 
 <entry key="MAX_SUBSET_ROW_INEQ_PERCUSTOMER">5</entry> 
-<entry key="MAX_SUBSET_ROW_INEQ_ROOTNODE">50</entry> 
+<entry key="MAX_SUBSET_ROW_INEQ_ROOTNODE">1000</entry> 
 
 <entry key="MAX_ITERATIONS_TS">30</entry> 
-<entry key="NUM_ITERATIONS_TS">100</entry> 
-<entry key="MAX_PATHS_PER_ITERATION_TABU">50</entry>
+<entry key="NUM_ITERATIONS_TS">1000</entry> 
+<entry key="MAX_PATHS_PER_ITERATION_TABU">500</entry>
 
 <entry key="USE_LABELING_ALG">false</entry> 
 <entry key="LABELING_NUM_NG_NEIGHBORS">7</entry> 

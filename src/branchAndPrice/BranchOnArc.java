@@ -81,11 +81,14 @@ public final class BranchOnArc extends  AbstractBranchCreator<VRPTW,RoutePattern
 					
 					for(int j = 0;j<base.size()-1;j++) {
 						String arc_act = base.get(j)+"-"+base.get(j+1);
-						if(!arc_values.containsKey(arc_act)) {
-							arc_values.put(arc_act,currentPath.value);
-						}else {
-							arc_values.put(arc_act,currentPath.value + arc_values.get(arc_act));
+						if(base.get(j) != 0 && base.get(j+1) != 0) {
+							if(!arc_values.containsKey(arc_act)) {
+								arc_values.put(arc_act,currentPath.value);
+							}else {
+								arc_values.put(arc_act,currentPath.value + arc_values.get(arc_act));
+							}
 						}
+						
 						
 					}
 				}

@@ -72,6 +72,11 @@ public class DataHandler {
 	public static double[] loadList;
 	
 	/**
+	 * Sort criteria for any arc i
+	 */
+	public static double[] sortList;
+	
+	/**
 	 * Distance matrix
 	 */
 	public static double[][] distance;
@@ -198,7 +203,13 @@ public class DataHandler {
 		// Read the coordinates file:
 		
 		File file = new File(CvsInput);
-		BufferedReader bufRdr = new BufferedReader(new FileReader(GlobalParameters.INSTANCE_FOLDER+file));
+		BufferedReader bufRdr = null;
+		try {
+			 bufRdr = new BufferedReader(new FileReader(GlobalParameters.INSTANCE_FOLDER+file));
+		}catch(Exception e) {
+			System.out.println("Instance is not available");
+			System.exit(0);
+		}
 		String line = bufRdr.readLine(); //Read number of nodes
 		
 		n = numNodes; 
@@ -261,6 +272,7 @@ public class DataHandler {
 		costList = new double[auxNumArcs];
 		loadList = new double[auxNumArcs];
 		timeList = new double[auxNumArcs];
+		sortList = new double[auxNumArcs];
 		arcs = new int[auxNumArcs][2];
 		int arc = 0;
 		for (int i = 0; i <= n; i++) {
@@ -280,6 +292,7 @@ public class DataHandler {
 					arcs_id[i][j] = arc;
 					distList[arc] = dINT;
 					costList[arc] = cost[i][j];
+					sortList[arc] = cost[i][j];
 					arcs[arc][0] = i;
 					arcs[arc][1] = j;
 					timeList[arc] = dINT + service[i];

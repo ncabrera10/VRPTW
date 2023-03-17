@@ -77,22 +77,22 @@ public class FinalNode extends Node {
 	/**
 	 * Distance of the paths found
 	 */
-	public Hashtable<String, Double> routesPoolDist;
+	public Hashtable<Integer, Double> routesPoolDist;
 	
 	/**
 	 * Reduced cost of the paths found
 	 */
-	public Hashtable<String, Double> routesPoolRC;
+	public Hashtable<Integer, Double> routesPoolRC;
 	
 	/**
 	 * Time of the paths found
 	 */
-	public Hashtable<String, Double> routesPoolTime;
+	public Hashtable<Integer, Double> routesPoolTime;
 	
 	/**
 	 * Load of the paths found
 	 */
-	public Hashtable<String, Double> routesPoolLoad;
+	public Hashtable<Integer, Double> routesPoolLoad;
 	
 	/**
 	 * List that contains the paths in string format
@@ -116,10 +116,10 @@ public class FinalNode extends Node {
 		magicIndex = new ArrayList<Integer>();
 		Path= new ArrayList<Integer>();
 		pool = new ArrayList<String>();
-		routesPoolDist = new Hashtable<String, Double>();
-		routesPoolRC  = new Hashtable<String, Double>();
-		routesPoolTime = new Hashtable<String, Double>();
-		routesPoolLoad = new Hashtable<String, Double>();
+		routesPoolDist = new Hashtable<Integer, Double>();
+		routesPoolRC  = new Hashtable<Integer, Double>();
+		routesPoolTime = new Hashtable<Integer, Double>();
+		routesPoolLoad = new Hashtable<Integer, Double>();
 	}
 	
 	/**
@@ -127,10 +127,10 @@ public class FinalNode extends Node {
 	 */
 	public void reset() {
 		pool = new ArrayList<String>();
-		routesPoolDist = new Hashtable<String, Double>();
-		routesPoolRC  = new Hashtable<String, Double>();
-		routesPoolTime = new Hashtable<String, Double>();
-		routesPoolLoad = new Hashtable<String, Double>();
+		routesPoolDist = new Hashtable<Integer, Double>();
+		routesPoolRC  = new Hashtable<Integer, Double>();
+		routesPoolTime = new Hashtable<Integer, Double>();
+		routesPoolLoad = new Hashtable<Integer, Double>();
 	}
 	
 	
@@ -178,22 +178,22 @@ public class FinalNode extends Node {
 					}
 					
 					this.Path.add(id);
-					
+					int id_path = PricingProblem_Handler.getNumPaths();
 					if(PCost < 0) {
 						String keyS = this.Path.toString();
-						if(!routesPoolRC.containsKey(keyS)) {
-							routesPoolRC.put(keyS,PCost);
-							routesPoolDist.put(keyS,PDist);
-							routesPoolTime.put(keyS,PTime);
-							routesPoolLoad.put(keyS,PLoad);
-							pool.add(keyS);
-							PricingProblem_Handler.setPruneHarder(0);
-							PricingProblem_Handler.setPrimalBound(PCost);
-							PricingProblem_Handler.setNumPaths(PricingProblem_Handler.getNumPaths()+1);
-							if(PricingProblem_Handler.getNumPaths() > CGParameters.MAX_PATHS_PER_ITERATION) {
-								PricingProblem_Handler.setStop(true);
-							}
+						
+						routesPoolRC.put(id_path,PCost);
+						routesPoolDist.put(id_path,PDist);
+						routesPoolTime.put(id_path,PTime);
+						routesPoolLoad.put(id_path,PLoad);
+						pool.add(keyS);
+						PricingProblem_Handler.setPruneHarder(0);
+						PricingProblem_Handler.setPrimalBound(PCost);
+						PricingProblem_Handler.setNumPaths(PricingProblem_Handler.getNumPaths()+1);
+						if(PricingProblem_Handler.getNumPaths() > CGParameters.MAX_PATHS_PER_ITERATION) {
+							PricingProblem_Handler.setStop(true);
 						}
+						
 						
 						
 					}
@@ -287,19 +287,19 @@ public class FinalNode extends Node {
 			this.Path.add(path.get(i));
 		}
 		this.Path.add(id);
-
+		int id_path = PricingProblem_Handler.getNumPaths();
 		String keyS = this.Path.toString();
-		if(!routesPoolRC.containsKey(keyS)) {
 		
-			routesPoolRC.put(keyS,L.getReducedCost());
-			routesPoolDist.put(keyS,L.getCost());
-			routesPoolTime.put(keyS,L.getTotalTime());
-			routesPoolLoad.put(keyS,L.getLoad());
-			pool.add(keyS);
-			PricingProblem_Handler.setPruneHarder(0);
-			PricingProblem_Handler.setPrimalBound(L.getReducedCost());
-			PricingProblem_Handler.setNumPaths(PricingProblem_Handler.getNumPaths()+1);
-		}
+		
+		routesPoolRC.put(id_path,L.getReducedCost());
+		routesPoolDist.put(id_path,L.getCost());
+		routesPoolTime.put(id_path,L.getTotalTime());
+		routesPoolLoad.put(id_path,L.getLoad());
+		pool.add(keyS);
+		PricingProblem_Handler.setPruneHarder(0);
+		PricingProblem_Handler.setPrimalBound(L.getReducedCost());
+		PricingProblem_Handler.setNumPaths(PricingProblem_Handler.getNumPaths()+1);
+	
 	
 	}
 	

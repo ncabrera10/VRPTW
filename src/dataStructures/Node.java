@@ -608,9 +608,9 @@ public class Node implements Cloneable{
 		int temp;
 	
 		pivot = b;
-		pivotVal = DataHandler.costList[e.get(pivot)] ;
+		pivotVal = DataHandler.sortList[e.get(pivot)] ;
 		for (i = b + 1; i <= t; i++) {
-			if (   DataHandler.costList[e.get(i)]< pivotVal) {
+			if (   DataHandler.sortList[e.get(i)]< pivotVal) {
 				pivot++;
 				temp = e.get(i);
 				e.set(i, e.get(pivot));
@@ -718,6 +718,7 @@ public class Node implements Cloneable{
 							rIndex = PricingProblem_Handler.binarySearch_NG(Lp, PricingProblem_Handler.getLabelsQueue_NG());
 							if(rIndex == -1) {
 								boolean encontrado = false;
+								
 								for(int j = 0;j < PricingProblem_Handler.getLabelsQueue_NG().size() && !encontrado;j++) {
 									Nglabel lab = PricingProblem_Handler.getLabelsQueue_NG().get(j);
 									if(lab.getId() == Lp.getId()) {
@@ -726,7 +727,10 @@ public class Node implements Cloneable{
 									}
 								}
 							}
-							PricingProblem_Handler.getLabelsQueue_NG().remove(rIndex);
+							if(rIndex != -1) {
+								PricingProblem_Handler.getLabelsQueue_NG().remove(rIndex);
+							}
+							
 						}
 						NGlabelsList.remove(i);
 					}
@@ -772,7 +776,9 @@ public class Node implements Cloneable{
 									}
 								}
 							}
-							PricingProblem_Handler.getLabelsQueue_NG().remove(rIndex);
+							if(rIndex != -1) {
+								PricingProblem_Handler.getLabelsQueue_NG().remove(rIndex);
+							}
 						}
 						NGlabelsList.remove(i);
 					}

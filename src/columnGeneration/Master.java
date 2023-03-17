@@ -182,7 +182,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PricingPro
 				// Creates the artificial pattern and adds it to the list of paths:
 					
 					RoutePattern column=new RoutePattern("Artificial", false, pattern,cost*10,route,pricingProblem,0,-1,-1); //We make them artificial so they stay forever.. in the BAP
-					paths.add(column);
 					initSolution.add(column);
 					generator.add(-1);
 				
@@ -193,7 +192,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PricingPro
 				// Creates the same column but with the real cost
 				
 					column = new RoutePattern("Initialization", false, pattern,cost,route,pricingProblem,0,-1,-1); //These are not artificial.. in the BAP
-					paths.add(column);
 					initSolution.add(column);
 					generator.add(-1);
 					
@@ -256,7 +254,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PricingPro
 					// Creates the artificial pattern and adds it to the list of paths:
 						
 						RoutePattern column=new RoutePattern("Artificial", false, pattern,cost*10,route,pricingProblem,0,-1,-1); //We make them artificial so they stay forever.. in the BAP
-						paths.add(column);
 						initSolution.add(column);
 						generator.add(-1);
 					
@@ -267,7 +264,6 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PricingPro
 					// Creates the same column but with the real cost
 					
 						column = new RoutePattern("Initialization", false, pattern,cost,route,pricingProblem,0,-1,-1); //These are not artificial.. in the BAP
-						paths.add(column);
 						initSolution.add(column);
 						generator.add(-1);
 						
@@ -347,6 +343,7 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PricingPro
 			// Potentially export the model:
 			
 			if(config.EXPORT_MODEL) cplex.exportModel("./output/master_"+this.getIterationCount()+".lp");
+			//cplex.exportModel("./output/master_test"+".lp");
 			
 			// Start the clock:
 			
@@ -514,7 +511,8 @@ public final class Master extends AbstractMaster<VRPTW, RoutePattern, PricingPro
 			RoutePattern[] routePatterns=masterData.getVarMap().getKeysAsArray(new RoutePattern[masterData.getNrColumns()]);
 			IloNumVar[] vars=masterData.getVarMap().getValuesAsArray(new IloNumVar[masterData.getNrColumns()]);
 			double[] values= cplex.getValues(vars);
-			
+			basisIndexes = new ArrayList<Integer>();
+			ceroRCIndexes = new ArrayList<Integer>();
 			//Iterate over each column and add it to the solution if it has a non-zero value
 			for(int i=0; i<routePatterns.length; i++){
 				routePatterns[i].value=values[i];

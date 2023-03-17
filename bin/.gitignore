@@ -1,10 +1,4 @@
-/.DS_Store
-/branchAndPrice/
-/columnGeneration/
 /dataStructures/
-/director/
-/main/
-/parameters/
 /pricingAlgorithms/
-/utilities/
-/metaheuristics/
+/main/
+/columnGeneration/

@@ -29,6 +29,13 @@ public class Solver {
 	 */
 	private int type;
 	
+	private String instance_type;
+	
+	private int instance_id;
+	
+	private int num_nodes;
+	
+	
 	/**
 	 * This method creates a solver instance
 	 * @param dataFile
@@ -44,6 +51,9 @@ public class Solver {
 		// Instance identifier
 		
 		instance = instanceType+"-"+instanceID+"_"+numNodes;
+		instance_type = instanceType;
+		instance_id = instanceID;
+		num_nodes = numNodes;
 		
 		// Creates the data handler:
 		
@@ -170,6 +180,9 @@ public class Solver {
 		try {
 			pw = new PrintWriter(new File(ruta));
 			pw.println("Instance:"+instance);
+			pw.println("InstanceType:"+instance_type);
+			pw.println("InstanceId:"+instance_id);
+			pw.println("InstanceNumNodes:"+num_nodes);
 			pw.println("Configuration:"+CGParameters.CONFIGURATION);
 			pw.println("UpperBound:"+CGSolver.getUpperBound());//+CG.getUpperBound());
 			pw.println("LowerBound:"+CGSolver.getLowerBound());	
@@ -179,6 +192,7 @@ public class Solver {
 			pw.println("NumberOfColumns_IniStep:"+VRPTW.numColumns_iniStep);
 			pw.println("NumberOfColumns_Additional:"+(VRPTW.numColumns - VRPTW.numColumns_iniStep));
 			pw.println("NumberOfCuts:"+VRPTW.numCutsAdded);
+			pw.println("NumberOfBAPnodes:"+VRPTW.numBAPnodes);
 			pw.println("PricingPulse:"+VRPTW.number_pricing_byPulse);
 			pw.println("PricingTabu:"+VRPTW.number_pricing_byTabu);
 			pw.println("PricingToOptimality:"+VRPTW.number_pricing_solvedToOptimality);
@@ -234,6 +248,9 @@ public class Solver {
 		try {
 			pw = new PrintWriter(new File(ruta));
 			pw.println("Instance:"+instance);
+			pw.println("InstanceType:"+instance_type);
+			pw.println("InstanceId:"+instance_id);
+			pw.println("InstanceNumNodes:"+num_nodes);
 			pw.println("Configuration:"+CGParameters.CONFIGURATION);
 			pw.println("UpperBound:"+CGSolver.getUpperBound());//+CG.getUpperBound());
 			pw.println("LowerBound:"+CGSolver.getLowerBound());	
@@ -243,6 +260,7 @@ public class Solver {
 			pw.println("NumberOfColumns_IniStep:"+VRPTW.numColumns_iniStep);
 			pw.println("NumberOfColumns_Additional:"+(VRPTW.numColumns - VRPTW.numColumns_iniStep));
 			pw.println("NumberOfCuts:"+VRPTW.numCutsAdded);
+			pw.println("NumberOfBAPnodes:"+VRPTW.numBAPnodes);
 			pw.println("PricingPulse:"+VRPTW.number_pricing_byPulse);
 			pw.println("PricingTabu:"+VRPTW.number_pricing_byTabu);
 			pw.println("PricingToOptimality:"+VRPTW.number_pricing_solvedToOptimality);
@@ -269,7 +287,7 @@ public class Solver {
 		//1.0 Creates a data handler
 		
 		DataHandler data = new DataHandler(dataFile,instanceType,instanceID,numNodes,CGParameters.BOUND_STEP_PULSE);
-	
+		
 		//1.1 Read solomon nodes:
 		
 		data.readSolomon(numNodes);

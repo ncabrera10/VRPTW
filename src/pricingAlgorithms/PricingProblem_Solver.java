@@ -157,7 +157,7 @@ public final class PricingProblem_Solver extends AbstractPricingProblemSolver<VR
 			List<RoutePattern> newPatterns = new ArrayList<>();
 				
 		// 1. Updates the weights of the arcs :
-		
+			
 			for(int i = 0;i < DataHandler.numArcs;i++) {
 				
 				DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] = DataHandler.cost[DataHandler.arcs[i][0]][DataHandler.arcs[i][1]] - Master.getDuals()[DataHandler.arcs[i][0]];
@@ -259,10 +259,10 @@ public final class PricingProblem_Solver extends AbstractPricingProblemSolver<VR
 			
 			//Capture the cost and the reduced cost:
 			
-			double cost = GraphManager.finalNode.routesPoolDist.get(col);
-			double rco = GraphManager.finalNode.routesPoolRC.get(col);
-			double tim = GraphManager.finalNode.routesPoolTime.get(col);
-			double loa = GraphManager.finalNode.routesPoolLoad.get(col);
+			double cost = GraphManager.finalNode.routesPoolDist.get(i);
+			double rco = GraphManager.finalNode.routesPoolRC.get(i);
+			double tim = GraphManager.finalNode.routesPoolTime.get(i);
+			double loa = GraphManager.finalNode.routesPoolLoad.get(i);
 			
 			
 			//Put a 1 in the vector if the customer is there:
