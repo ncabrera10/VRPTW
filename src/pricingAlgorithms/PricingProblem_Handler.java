@@ -261,12 +261,7 @@ public class PricingProblem_Handler {
 			
 			for (int i = 1; i <= DataHandler.n; i++) {					
 				GraphManager.nodes[i].pulseBound(0, GraphManager.timeIncumbent, 0 , new ArrayList<Integer>(), i,0); 	// Solve an ESPPRC for all nodes given the time incumbent 
-			}
-			
-			// Store the best cost found for each node:
-			
-			for(int i=1; i<=DataHandler.n; i++){
-				GraphManager.boundsMatrix[i][timeIndex] = GraphManager.bestCost[i];
+				GraphManager.boundsMatrix[i][timeIndex] = GraphManager.bestCost[i]; // Store the best cost found for each node:
 			}
 			
 			// Store the best overall cost (considering all nodes): 
